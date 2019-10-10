@@ -12,7 +12,7 @@
 
 // most launchpads have a red LED
 #define KB_LED RED_LED
-#define REQ_LED GREEN_LED
+//#define REQ_LED GREEN_LED
 /*
 #define latchPin P2_3
 #define dataPin P2_4
@@ -24,11 +24,13 @@
 #define dataPin   P2_1
 #define clockPin  P2_0
 
-#define reqPin    P2_3
+#define reqPin       P1_3
+#define dataReqPin   P1_4
+#define clockReqPin  P1_5
 
-const byte COL_COUNT = 4;
-const byte ROW_COUNT = 2;
-const uint16_t rowPins[ROW_COUNT] = {P2_3, P2_4};
+const byte COL_COUNT = 10;
+const byte ROW_COUNT = 4;
+const uint16_t rowPins[ROW_COUNT] = {P2_3, P2_4, P2_5, P1_6};
 
 #define STATE_UP    0
 #define STATE_TO_DN 1
@@ -49,14 +51,16 @@ void setup() {
   pinMode(dataPin, OUTPUT);
   
   pinMode(reqPin, INPUT_PULLUP);
+  pinMode(clockReqPin, OUTPUT);
+  pinMode(dataReqPin, OUTPUT);
 
   for(int row=0; row<ROW_COUNT; row++) pinMode(rowPins[row], INPUT_PULLUP);  
   
   attachInterrupt(reqPin, req_irq, FALLING);
   
-  digitalWrite(REQ_LED, HIGH);
-  delay(100);
-  digitalWrite(REQ_LED, LOW);
+  //digitalWrite(REQ_LED, HIGH);
+  //delay(100);
+  //digitalWrite(REQ_LED, LOW);
   digitalWrite(KB_LED, HIGH);
   delay(100);
   digitalWrite(KB_LED, LOW);
@@ -125,9 +129,10 @@ void loop() {
     // pop
     // snd
     req=0;
-    digitalWrite(REQ_LED, HIGH);
-    delay(100);
-    digitalWrite(REQ_LED, LOW);
+    Serial.println("REQ");
+    //digitalWrite(REQ_LED, HIGH);
+    //delay(100);
+    //digitalWrite(REQ_LED, LOW);
   }
 }
 
