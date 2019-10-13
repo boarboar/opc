@@ -24,9 +24,9 @@
 #define dataPin   P2_1
 #define clockPin  P2_0
 
-#define reqPin       P1_3
-#define dataReqPin   P1_4
-#define clockReqPin  P1_5
+//#define reqPin       P1_3
+//#define dataReqPin   P1_4
+//#define clockReqPin  P1_5
 
 const byte COL_COUNT = 10;
 const byte ROW_COUNT = 4;
@@ -37,6 +37,15 @@ const uint16_t rowPins[ROW_COUNT] = {P2_3, P2_4, P2_5, P1_6};
 #define STATE_DN    2
 #define STATE_TO_UP 3
 uint8_t state[COL_COUNT][ROW_COUNT] = {STATE_UP};
+
+uint8_t keymap[ROW_COUNT][COL_COUNT] = {
+{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
+{'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
+{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
+{0x00, 0xff, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
+};
+uint8_t keymap_shift[ROW_COUNT][COL_COUNT] = {0};
+uint8_t keymap_fun[ROW_COUNT][COL_COUNT] = {0};
 
 volatile uint8_t req=0;
 
@@ -50,13 +59,13 @@ void setup() {
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
   
-  pinMode(reqPin, INPUT_PULLUP);
-  pinMode(clockReqPin, OUTPUT);
-  pinMode(dataReqPin, OUTPUT);
+  //pinMode(reqPin, INPUT_PULLUP);
+  //pinMode(clockReqPin, OUTPUT);
+  //pinMode(dataReqPin, OUTPUT);
 
   for(int row=0; row<ROW_COUNT; row++) pinMode(rowPins[row], INPUT_PULLUP);  
   
-  attachInterrupt(reqPin, req_irq, FALLING);
+  //attachInterrupt(reqPin, req_irq, FALLING);
   
   //digitalWrite(REQ_LED, HIGH);
   //delay(100);
@@ -65,7 +74,6 @@ void setup() {
   delay(100);
   digitalWrite(KB_LED, LOW);
 
-  
   Serial.begin(9600);
 }
 
@@ -92,7 +100,9 @@ void loop() {
             break;
           case STATE_TO_DN : 
             state[col][row] = STATE_DN;
-            Serial.print(col); Serial.print(",");Serial.print(row);Serial.println(" = DN!!!");
+            Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
+            Serial.print((char)keymap[row][col]);
+            Serial.println(")");
             // push_dn
             digitalWrite(KB_LED, HIGH); 
             break;
@@ -110,7 +120,7 @@ void loop() {
             break;
           case STATE_TO_UP : 
             state[col][row] = STATE_UP;
-            Serial.print(col);Serial.print(",");Serial.print(row);Serial.println(" = UP!!!");
+            Serial.print(col);Serial.print(",");Serial.print(row);Serial.println(" = UP");
             //push_up
             digitalWrite(KB_LED, LOW); 
             break;
@@ -124,7 +134,7 @@ void loop() {
     }
     u<<=1;
   }
-  
+/*  
   if(req) {
     // pop
     // snd
@@ -134,9 +144,11 @@ void loop() {
     //delay(100);
     //digitalWrite(REQ_LED, LOW);
   }
+  */
 }
 
+/*
 void req_irq() {
   req=1;
 }
-
+*/
