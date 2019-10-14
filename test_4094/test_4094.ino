@@ -38,16 +38,32 @@ const uint16_t rowPins[ROW_COUNT] = {P2_3, P2_4, P2_5, P1_6};
 #define STATE_TO_UP 3
 uint8_t state[COL_COUNT][ROW_COUNT] = {STATE_UP};
 
+/*
 uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
 {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
 {'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
-{0x00, 0xff, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
+{KEY_SHIFT, KEY_FN, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
 };
+*/
+
+#define KEY_SHIFT   0xff
+#define KEY_FN      0xfe
+
+uint8_t keymap[ROW_COUNT][COL_COUNT] = {  // for SHFT test
+{KEY_SHIFT, '2', '3', '4', '5', '6', '7', '8', '9', '0'},
+{KEY_FN, 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
+{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
+{'?', '?', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
+};
+
 uint8_t keymap_shift[ROW_COUNT][COL_COUNT] = {0};
 uint8_t keymap_fun[ROW_COUNT][COL_COUNT] = {0};
 
-volatile uint8_t req=0;
+uint8_t shift_pressed=0;
+uint8_t fn_pressed=0;
+
+//volatile uint8_t req=0;
 
 #define SCAN_DELAY 20
 
@@ -100,10 +116,16 @@ void loop() {
             break;
           case STATE_TO_DN : 
             state[col][row] = STATE_DN;
-            Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
-            Serial.print((char)keymap[row][col]);
-            Serial.println(")");
-            // push_dn
+            switch(keymap[row][col]) {
+              case KEY_SHIFT: shift_pressed=1; break;
+              case KEY_FN: fn_pressed=1; break;
+              default:
+                Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
+                Serial.print((char)keymap[row][col]);
+                if(shift_pressed) Serial.print(" SHIFT ");
+                if(fn_pressed) Serial.print(" FN ");
+                Serial.println(")");
+            }
             digitalWrite(KB_LED, HIGH); 
             break;
           case STATE_TO_UP : 
@@ -120,8 +142,14 @@ void loop() {
             break;
           case STATE_TO_UP : 
             state[col][row] = STATE_UP;
-            Serial.print(col);Serial.print(",");Serial.print(row);Serial.println(" = UP");
-            //push_up
+            switch(keymap[row][col]) {
+              case KEY_SHIFT: shift_pressed=0; break;
+              case KEY_FN: fn_pressed=0; break;
+              default:
+                Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = UP (");
+                Serial.print((char)keymap[row][col]);
+                Serial.println(")");
+            }
             digitalWrite(KB_LED, LOW); 
             break;
           case STATE_TO_DN : 
