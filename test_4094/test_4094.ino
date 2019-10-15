@@ -57,8 +57,15 @@ uint8_t keymap[ROW_COUNT][COL_COUNT] = {  // for SHFT test
 {'?', '?', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
 };
 
-uint8_t keymap_shift[ROW_COUNT][COL_COUNT] = {0};
-uint8_t keymap_fun[ROW_COUNT][COL_COUNT] = {0};
+uint8_t keymap_shift[ROW_COUNT][COL_COUNT] = 
+{
+{'!','@','#','$','%','^','&','*','(',')'},
+{'Q','W','E','R','T','Y','U','I','O','P'},
+{'A','S','D','F','G','H','J','K','L','\r'},
+{0, 0, 'Z','X','C','V','B','N','M',' '}
+};
+
+uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {0};
 
 uint8_t shift_pressed=0;
 uint8_t fn_pressed=0;
@@ -120,11 +127,18 @@ void loop() {
               case KEY_SHIFT: shift_pressed=1; break;
               case KEY_FN: fn_pressed=1; break;
               default:
+                char key = 
+                  shift_pressed ? keymap_shift[row][col] :
+                  fn_pressed ? keymap_fn[row][col] :
+                  keymap[row][col];
+                if(key) Serial.print(key);
+              /*  
                 Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
                 Serial.print((char)keymap[row][col]);
                 if(shift_pressed) Serial.print(" SHIFT ");
                 if(fn_pressed) Serial.print(" FN ");
                 Serial.println(")");
+                */
             }
             digitalWrite(KB_LED, HIGH); 
             break;
@@ -145,10 +159,10 @@ void loop() {
             switch(keymap[row][col]) {
               case KEY_SHIFT: shift_pressed=0; break;
               case KEY_FN: fn_pressed=0; break;
-              default:
-                Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = UP (");
-                Serial.print((char)keymap[row][col]);
-                Serial.println(")");
+              default:;
+                //Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = UP (");
+                //Serial.print((char)keymap[row][col]);
+                //Serial.println(")");
             }
             digitalWrite(KB_LED, LOW); 
             break;
