@@ -13,24 +13,25 @@
 // most launchpads have a red LED
 #define KB_LED RED_LED
 //#define REQ_LED GREEN_LED
+
+//unsigned char sequence[8] = {B00000001, B00000010, B00000100, B00001000, B00010000, B00100000, B01000000, B10000000};
+
+const byte COL_COUNT = 10;
+const byte ROW_COUNT = 4;
+
 /*
 #define latchPin P2_3
 #define dataPin P2_4
 #define clockPin P2_5
 */
-//unsigned char sequence[8] = {B00000001, B00000010, B00000100, B00001000, B00010000, B00100000, B01000000, B10000000};
 
 #define latchPin  P2_2
 #define dataPin   P2_1
 #define clockPin  P2_0
 
-//#define reqPin       P1_3
-//#define dataReqPin   P1_4
-//#define clockReqPin  P1_5
+//const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_5};
 
-const byte COL_COUNT = 10;
-const byte ROW_COUNT = 4;
-const uint16_t rowPins[ROW_COUNT] = {P2_3, P2_4, P2_5, P1_6};
+const uint16_t rowPins[ROW_COUNT] = {P2_3, P2_4, P2_5, P1_5};
 
 #define STATE_UP    0
 #define STATE_TO_DN 1
@@ -65,7 +66,12 @@ uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 {0, 0, 'Z','X','C','V','B','N','M',' '}
 };
 
-uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {0};
+uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
+{127, '\c', '\d', 0, 0, 27, 24, 25, 26, '\b'},  //  l, u, d, r, bsp
+{'\t', '~', 0, 0, '-', '_', '=', '+', '\\', '|'},
+{0, 0, ';', ':', '"', '\'', '[', '{', ']', '}'},
+{0,0,0,0,',','<', '.', '>', '/', '?'}
+};
 
 uint8_t shift_pressed=0;
 uint8_t fn_pressed=0;
