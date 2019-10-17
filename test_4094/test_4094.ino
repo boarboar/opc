@@ -19,19 +19,20 @@
 const byte COL_COUNT = 10;
 const byte ROW_COUNT = 4;
 
-/*
+
 #define latchPin P2_3
 #define dataPin P2_4
 #define clockPin P2_5
-*/
 
+const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_5};
+
+/*
 #define latchPin  P2_2
 #define dataPin   P2_1
 #define clockPin  P2_0
 
-//const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_5};
-
 const uint16_t rowPins[ROW_COUNT] = {P2_3, P2_4, P2_5, P1_5};
+*/
 
 #define STATE_UP    0
 #define STATE_TO_DN 1
@@ -62,12 +63,12 @@ uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 {
 {'!','@','#','$','%','^','&','*','(',')'},
 {'Q','W','E','R','T','Y','U','I','O','P'},
-{'A','S','D','F','G','H','J','K','L','\r'},
+{'A','S','D','F','G','H','J','K','L','\n'},
 {0, 0, 'Z','X','C','V','B','N','M',' '}
 };
 
 uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
-{127, '\c', '\d', 0, 0, 27, 24, 25, 26, '\b'},  //  l, u, d, r, bsp
+{127, '0', '\d', 0, 0, 27, 24, 25, 26, '\b'},  //  l, u, d, r, bsp
 {'\t', '~', 0, 0, '-', '_', '=', '+', '\\', '|'},
 {0, 0, ';', ':', '"', '\'', '[', '{', ']', '}'},
 {0,0,0,0,',','<', '.', '>', '/', '?'}
@@ -75,10 +76,13 @@ uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 
 uint8_t shift_pressed=0;
 uint8_t fn_pressed=0;
+char key_pressed=0;
+uint16_t rep = 0;
 
 //volatile uint8_t req=0;
 
 #define SCAN_DELAY 20
+#define REP_COUNT  25
 
 void setup() {                
   // initialize the digital pin as an output.
@@ -137,7 +141,11 @@ void loop() {
                   shift_pressed ? keymap_shift[row][col] :
                   fn_pressed ? keymap_fn[row][col] :
                   keymap[row][col];
-                if(key) Serial.print(key);
+                if(key) {
+                  key_pressed = key;
+                  rep=0;
+                  Serial.print(key);
+                }
               /*  
                 Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
                 Serial.print((char)keymap[row][col]);
@@ -166,6 +174,7 @@ void loop() {
               case KEY_SHIFT: shift_pressed=0; break;
               case KEY_FN: fn_pressed=0; break;
               default:;
+                key_pressed=0;
                 //Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = UP (");
                 //Serial.print((char)keymap[row][col]);
                 //Serial.println(")");
@@ -181,6 +190,11 @@ void loop() {
       }
     }
     u<<=1;
+  }
+  
+  if(key_pressed && rep++>=REP_COUNT) {
+    Serial.print(key_pressed);
+    rep=0;
   }
 /*  
   if(req) {
