@@ -24,7 +24,7 @@ const byte ROW_COUNT = 4;
 #define dataPin P2_4
 #define clockPin P2_5
 
-const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_5};
+const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_4}; //can't use P1_5 - spi clk
 
 /*
 #define latchPin  P2_2
@@ -76,13 +76,15 @@ uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 
 uint8_t shift_pressed=0;
 uint8_t fn_pressed=0;
+
 char key_pressed=0;
-uint16_t rep = 0;
+uint8_t rep = 0;
+uint32_t t;
 
 //volatile uint8_t req=0;
 
 #define SCAN_DELAY 20
-#define REP_COUNT  25
+#define REP_COUNT  10
 
 void setup() {                
   // initialize the digital pin as an output.
@@ -107,11 +109,23 @@ void setup() {
   delay(100);
   digitalWrite(KB_LED, LOW);
 
-  Serial.begin(9600);
+  Serial.begin(9600); 
+  t=millis();
 }
 
 void loop() {
-  delay(SCAN_DELAY);               // wait scan
+  if(millis()<t) {
+    // wraparound
+    t=millis();
+    return;
+  }
+  if(millis()>=t+SCAN_DELAY) {
+    key_loop();
+    t=millis();
+  }
+}
+
+void key_loop() {
   uint16_t u=1;
   for (int col = 0; col < COL_COUNT; col++)   
   {
