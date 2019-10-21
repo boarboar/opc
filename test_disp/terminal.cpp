@@ -3,7 +3,7 @@
 
 void LCDTerminal::init() {
   Tft.TFTinit();
-  Tft.setOrientation(LCD_LANDSCAPE);  
+  Tft.setOrientation(WS_ORIENT);  
   lcd_defaults();
   _x_pos = _y_pos = 0;
   _y_scroll=0;
@@ -15,7 +15,7 @@ void LCDTerminal::lcd_defaults() {
   Tft.setFgColor(GREEN);
   Tft.setSize(WS_CHAR_DEF_SIZE);
   Tft.setOpaq(LCD_TRANSP);
-  Tft.setupScrollArea(WS_SCREEN_SIZE_Y, WS_CHAR_S_Y, 0);
+  Tft.setupScrollArea(WS_SCREEN_SIZE_Y, 0, 0);
 }
 
 void LCDTerminal::print(char c) {

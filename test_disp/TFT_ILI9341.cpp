@@ -386,8 +386,8 @@ void TFT::setupScrollArea(INT16U vsz, INT16U tfa, INT16U bfa) {
 // ##############################################################################################
 void TFT::scrollAddress(INT16U vsp) {
   sendCMD(ILI9341_VSCRSADD); // Vertical scrolling pointer
-  sendData(vsp>>8);
-  sendData(vsp&0xff);
+  WRITE_DATA(vsp>>8);
+  WRITE_DATA(vsp&0xff);
 }
 
 /*        

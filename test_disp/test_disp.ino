@@ -9,8 +9,9 @@ void setup()
   delay(100);
   pinMode(RED_LED,OUTPUT);
   t.init();  
-  for(int i=0; i<60; i++)    
-    t.print('A'+i);
+  for(int j=0;j<WS_CHAR_N_Y;j++)
+    for(int i=0; i<WS_CHAR_N_X; i++)    
+    t.print('a'+j);
 }
 
 void loop()
