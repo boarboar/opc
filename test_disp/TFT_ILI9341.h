@@ -107,6 +107,13 @@
 #define FONT_Y 8
 #define FONT_SZ 5
 
+
+#define ILI9341_PTLAR   0x30
+#define ILI9341_VSCRDEF 0x33
+#define ILI9341_MADCTL  0x36
+#define ILI9341_VSCRSADD 0x37
+#define ILI9341_PIXFMT  0x3A
+
 extern INT8U simpleFont[][FONT_SZ];
 
 class TFT
@@ -157,6 +164,10 @@ public:
         inline void setMask(INT8U v) {_size_mask_thick=v;}
         inline void setThick(INT8U v) {_size_mask_thick=v;}
         inline INT8U getSize() { return _size_mask_thick; }
+        
+        void setupScrollArea(INT16U vsz, INT16U tfa, INT16U bfa);
+        void scrollAddress(INT16U vsp);
+
 protected:
         void WriteCmdSeq(const INT8U *data);
 //        void setWindow(INT16U StartCol, INT16U EndCol, INT16U StartPage,INT16U EndPage);

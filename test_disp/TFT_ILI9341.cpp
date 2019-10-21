@@ -365,6 +365,31 @@ void TFT::drawLineThickLowRAM8Bit(INT16 x0,INT16 y0,INT16 x1,INT16 y1)
     }
 }
 
+
+// ##############################################################################################
+// Setup a portion of the screen for vertical scrolling
+// ##############################################################################################
+// We are using a hardware feature of the display, so we can only scroll in portrait orientation
+void TFT::setupScrollArea(INT16U vsz, INT16U tfa, INT16U bfa) {
+  vsz-=(tfa+bfa);
+  sendCMD(ILI9341_VSCRDEF); // Vertical scroll definition
+  WRITE_DATA(tfa >> 8);           // Top Fixed Area line count
+  WRITE_DATA(tfa&0xff);
+  WRITE_DATA(vsz>>8);  // Vertical Scrolling Area line count
+  WRITE_DATA(vsz&0xff);
+  WRITE_DATA(bfa >> 8);           // Bottom Fixed Area line count
+  WRITE_DATA(bfa&0xff);
+}
+
+// ##############################################################################################
+// Setup the vertical scrolling start address pointer
+// ##############################################################################################
+void TFT::scrollAddress(INT16U vsp) {
+  sendCMD(ILI9341_VSCRSADD); // Vertical scrolling pointer
+  sendData(vsp>>8);
+  sendData(vsp&0xff);
+}
+
 /*        
 void TFT::drawRectangle(INT16 poX, INT16 poY, INT16U length, INT16U width)
 {
