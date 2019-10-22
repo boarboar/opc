@@ -6,13 +6,20 @@
 #include "TFT_ILI9341.h"
 #include <SPI.h>
 
-#define _cs P2_6
+#define _cs P2_6 
 #define _dc P2_7 
 
 #define TFT_CS_LOW  {digitalWrite(_cs, LOW);}
 #define TFT_CS_HIGH {digitalWrite(_cs, HIGH);}
 #define TFT_DC_LOW  {digitalWrite(_dc, LOW);}
 #define TFT_DC_HIGH {digitalWrite(_dc, HIGH);}
+
+/*
+#define TFT_CS_LOW  {P2OUT &= ~BIT6;}
+#define TFT_CS_HIGH {P2OUT |= BIT6;}
+#define TFT_DC_LOW  {P2OUT &= ~BIT7;}
+#define TFT_DC_HIGH {P2OUT |= BIT7;}
+*/
 
 const INT8U seq[]={
       4, 0xCF,    0x00,0x8B,0x30,
@@ -74,7 +81,6 @@ void TFT::WriteCmdSeq(const INT8U *data)
 
 void TFT::TFTinit (/*INT8U cs, INT8U dc*/)
 {
-
     _flags = 0;
 	
      // disable XTAL to use pins P2_6/7
@@ -379,6 +385,10 @@ void TFT::setupScrollArea(INT16U vsz, INT16U tfa, INT16U bfa) {
   WRITE_DATA(vsz&0xff);
   WRITE_DATA(bfa >> 8);           // Bottom Fixed Area line count
   WRITE_DATA(bfa&0xff);
+    // use sendData  for INT16U instead!!!
+  //sendData(tfa);
+  //sendData(vsz);
+  //sendData(bfa);
 }
 
 // ##############################################################################################
@@ -388,6 +398,7 @@ void TFT::scrollAddress(INT16U vsp) {
   sendCMD(ILI9341_VSCRSADD); // Vertical scrolling pointer
   WRITE_DATA(vsp>>8);
   WRITE_DATA(vsp&0xff);
+  //sendData(vsp);
 }
 
 /*        

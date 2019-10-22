@@ -14,6 +14,8 @@
 #define WS_SCREEN_SIZE_X  240
 #define WS_SCREEN_SIZE_Y  320
 
+#define WS_BG_COLOR  BLACK
+#define WS_FG_COLOR  GREEN
 
 #define WS_CHAR_DEF_SIZE 2
 #define WS_CHAR_S_X  (WS_CHAR_DEF_SIZE*FONT_SPACE)
