@@ -9,17 +9,18 @@
 #define _cs P2_6 
 #define _dc P2_7 
 
+/*
 #define TFT_CS_LOW  {digitalWrite(_cs, LOW);}
 #define TFT_CS_HIGH {digitalWrite(_cs, HIGH);}
 #define TFT_DC_LOW  {digitalWrite(_dc, LOW);}
 #define TFT_DC_HIGH {digitalWrite(_dc, HIGH);}
+*/
 
-/*
 #define TFT_CS_LOW  {P2OUT &= ~BIT6;}
 #define TFT_CS_HIGH {P2OUT |= BIT6;}
 #define TFT_DC_LOW  {P2OUT &= ~BIT7;}
 #define TFT_DC_HIGH {P2OUT |= BIT7;}
-*/
+
 
 const INT8U seq[]={
       4, 0xCF,    0x00,0x8B,0x30,
@@ -91,7 +92,7 @@ void TFT::TFTinit (/*INT8U cs, INT8U dc*/)
     pinMode(_dc,OUTPUT);
 	
     SPI.begin();
-    SPI.setClockDivider(2);
+    //SPI.setClockDivider(2);
     TFT_CS_HIGH;
     TFT_DC_HIGH;
     
@@ -330,8 +331,7 @@ void TFT::drawLineThickLowRAM8Bit(INT16 x0,INT16 y0,INT16 x1,INT16 y1)
     if(y0<y1) dy=y1-y0; else dy=y0-y1;
     
     err = dx-dy; // error value e_xy            
-    
-      
+          
     for (;;){                                                          
         if (2*err+dy >= 0) {                   // e_xy+e_x > 0                 
             if(x0>=0) { // draw vertical line at x0, length of _size_mask_thick : y0-_size_mask_thick/2 -  y0+_size_mask_thick/2
@@ -379,16 +379,9 @@ void TFT::drawLineThickLowRAM8Bit(INT16 x0,INT16 y0,INT16 x1,INT16 y1)
 void TFT::setupScrollArea(INT16U vsz, INT16U tfa, INT16U bfa) {
   vsz-=(tfa+bfa);
   sendCMD(ILI9341_VSCRDEF); // Vertical scroll definition
-  WRITE_DATA(tfa >> 8);           // Top Fixed Area line count
-  WRITE_DATA(tfa&0xff);
-  WRITE_DATA(vsz>>8);  // Vertical Scrolling Area line count
-  WRITE_DATA(vsz&0xff);
-  WRITE_DATA(bfa >> 8);           // Bottom Fixed Area line count
-  WRITE_DATA(bfa&0xff);
-    // use sendData  for INT16U instead!!!
-  //sendData(tfa);
-  //sendData(vsz);
-  //sendData(bfa);
+  sendData(tfa);
+  sendData(vsz);
+  sendData(bfa);
 }
 
 // ##############################################################################################
@@ -396,9 +389,7 @@ void TFT::setupScrollArea(INT16U vsz, INT16U tfa, INT16U bfa) {
 // ##############################################################################################
 void TFT::scrollAddress(INT16U vsp) {
   sendCMD(ILI9341_VSCRSADD); // Vertical scrolling pointer
-  WRITE_DATA(vsp>>8);
-  WRITE_DATA(vsp&0xff);
-  //sendData(vsp);
+  sendData(vsp);
 }
 
 /*        
