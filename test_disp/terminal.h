@@ -23,6 +23,7 @@
 #define WS_CHAR_S_Y  (WS_CHAR_DEF_SIZE*FONT_Y)
 #define WS_CHAR_N_Y   (WS_SCREEN_SIZE_Y/WS_CHAR_S_Y)
 
+#define WS_TAB_IDENT  2
 
 class LCDTerminal {
 public:
@@ -35,6 +36,7 @@ protected:
   uint8_t _y_pos; 
   uint8_t _x_pos;  
   uint8_t _y_scroll;  
+  void advance_y();
 };
 
 #endif
