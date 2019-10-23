@@ -6,15 +6,19 @@ LCDTerminal t;
 
 int8_t c = 0;
 int8_t ic = 0;
-char *sep="--%--";
+char sep[]="--_--\t+++\t---";
 void setup()
 {
+    Serial.begin(9600); 
+    
   pinMode(RED_LED,OUTPUT);
   t.init();  
   delay(100);
   for(int j=0;j<WS_CHAR_N_Y;j++)
     for(int i=0; i<WS_CHAR_N_X; i++)    
     t.print('a'+j);
+    
+ Serial.println("TEST");   
 }
 
 void loop()
