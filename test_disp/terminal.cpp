@@ -18,6 +18,12 @@ void LCDTerminal::lcd_defaults() {
   Tft.setupScrollArea(WS_SCREEN_SIZE_Y, 0, 0);
 }
 
+void LCDTerminal::print(const char *s) {
+  const char *p = s;
+  while(*p) print(*p++);
+  
+}
+  
 void LCDTerminal::print(char c) {
   switch(c) {
     case '\n' :
@@ -27,6 +33,8 @@ void LCDTerminal::print(char c) {
     case '\t' :  
       _x_pos+=WS_TAB_IDENT;
       if(_x_pos >= WS_CHAR_N_X) advance_y();
+      return;
+    case '\b' :  //TODO
       return;
     default:;  
   }

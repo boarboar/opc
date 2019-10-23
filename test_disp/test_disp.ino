@@ -5,7 +5,8 @@
 LCDTerminal t;
 
 int8_t c = 0;
-
+int8_t ic = 0;
+char *sep="--%--";
 void setup()
 {
   pinMode(RED_LED,OUTPUT);
@@ -24,6 +25,11 @@ void loop()
    delay(500);
    for(int i=0; i<WS_CHAR_N_X; i++)    
      t.print('0'+c); 
-   c=(c+1)%10;  
+   if(++c>=10) {
+     c=0;
+     sep[2]='0'+ic;     
+     ic++;
+     t.println(sep);
+   }  
 }
 

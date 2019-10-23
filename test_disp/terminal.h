@@ -30,6 +30,8 @@ public:
   void init();
   void lcd_defaults();
   void print(char c);
+  void print(const char *s);
+  inline void println(const char *s) {print(s); print('\n');}
   void scroll();
 protected:  
   TFT Tft;
