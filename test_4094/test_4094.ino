@@ -51,6 +51,13 @@ uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 
 #define KEY_SHIFT   0xff
 #define KEY_FN      0xfe
+#define KEY_ESC_R   0xfd  // escape seq
+#define KEY_ESC_D   0xfc  // escape seq
+#define KEY_ESC_U   0xfb  // escape seq
+#define KEY_ESC_L   0xfa  // escape seq
+#define KEY_CTRL_C  0x3
+#define KEY_CTRL_D  0x4
+#define KEY_ESC     0x1b
 
 uint8_t keymap[ROW_COUNT][COL_COUNT] = {  // for SHFT test
 {KEY_SHIFT, '2', '3', '4', '5', '6', '7', '8', '9', '0'},
@@ -68,7 +75,7 @@ uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 };
 
 uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
-{127, '0', '\d', 0, 0, 27, 24, 25, 26, '\b'},  //  l, u, d, r, bsp
+{KEY_ESC,  KEY_CTRL_C, KEY_CTRL_D, 0, 0, KEY_ESC_L, KEY_ESC_U, KEY_ESC_D, KEY_ESC_R, '\b'},  //  l, u, d, r, bsp
 {'\t', '~', 0, 0, '-', '_', '=', '+', '\\', '|'},
 {0, 0, ';', ':', '"', '\'', '[', '{', ']', '}'},
 {0,0,0,0,',','<', '.', '>', '/', '?'}
