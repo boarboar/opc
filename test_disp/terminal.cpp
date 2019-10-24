@@ -65,7 +65,9 @@ void LCDTerminal::advance_y() {
   
 void LCDTerminal::scroll() {
   //INT16U bot;
-  if(++_y_scroll > WS_CHAR_N_Y) _y_scroll=0;
+  if(++_y_scroll > WS_CHAR_N_Y) {
+    _y_scroll=1;
+  }
   Tft.scrollAddress((INT16U)(_y_scroll)*WS_CHAR_S_Y);
   Tft.setBgColor(WS_BG_COLOR);
   Tft.setFillColor(LCD_BG); 
