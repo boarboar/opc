@@ -24,7 +24,7 @@ void LCDTerminal::print(const char *s) {
   
 }
   
-void LCDTerminal::print(char c) {
+void LCDTerminal::print(char c) {  
   switch(c) {
     case '\n' :
     case '\r' :
@@ -34,7 +34,14 @@ void LCDTerminal::print(char c) {
       _x_pos+=WS_TAB_IDENT;
       if(_x_pos >= WS_CHAR_N_X) advance_y();
       return;
-    case '\b' :  //TODO
+    case '\b' :
+      if(_x_pos > 0) {
+        _x_pos--;
+        Tft.setBgColor(WS_BG_COLOR);
+        Tft.setFillColor(LCD_BG); 
+        _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll;
+        Tft.fillScreen((INT16U)_x_pos*WS_CHAR_S_X, (INT16U)(_x_pos+1)*WS_CHAR_S_X-1, (INT16U)(_yeff-1)*WS_CHAR_S_Y, (INT16U)_yeff*WS_CHAR_S_Y);
+      }
       return;
     default:;  
   }

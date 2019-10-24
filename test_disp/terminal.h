@@ -38,6 +38,7 @@ protected:
   uint8_t _y_pos; 
   uint8_t _x_pos;  
   uint8_t _y_scroll;  
+  uint8_t _yeff;
   void advance_y();
 };
 

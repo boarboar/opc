@@ -21,8 +21,8 @@
 #define TFT_DC_LOW  {P2OUT &= ~BIT7;}
 #define TFT_DC_HIGH {P2OUT |= BIT7;}
 
-
 const INT8U seq[]={
+      //4, 0xEF,    0x03,0x80,0x02, // try to uncomment
       4, 0xCF,    0x00,0x8B,0x30,
       5, 0xED,    0x67,0x03,0x12,0x81,
       4, 0xE8,    0x85,0x10,0x7A,
@@ -92,14 +92,20 @@ void TFT::TFTinit (/*INT8U cs, INT8U dc*/)
     pinMode(_dc,OUTPUT);
 	
     SPI.begin();
-    //SPI.setClockDivider(2);
+    SPI.setClockDivider(2);
+	
+	// ??? try to comment
     TFT_CS_HIGH;
-    TFT_DC_HIGH;
-    
+    TFT_DC_HIGH;    
     delay(500);
-    sendCMD(0x01);
+	
+    sendCMD(0x01); // SW reset
     delay(200);    
-    
+    // ???
+	// 
+	// sendCMD(0x01); // SW reset
+	// delay(5)
+	
     WriteCmdSeq(seq);
 
     sendCMD(0x11);                                                      /* Exit Sleep                   */
