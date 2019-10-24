@@ -6,7 +6,7 @@ LCDTerminal t;
 
 int8_t c = 0;
 int8_t ic = 0;
-char sep[]="--_--\t+++\t---";
+char sep[]="--_--\t+++\t---\b\b\b\b\b";
 void setup()
 {
     Serial.begin(9600); 
@@ -33,7 +33,8 @@ void loop()
      c=0;
      sep[2]='0'+ic;     
      ic++;
-     t.println(sep);
+     t.print(sep);
+     t.println("@@@");
    }  
 }
 

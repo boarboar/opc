@@ -15,6 +15,7 @@ void LCDTerminal::lcd_defaults() {
   Tft.setFgColor(WS_FG_COLOR);
   Tft.setSize(WS_CHAR_DEF_SIZE);
   Tft.setOpaq(LCD_TRANSP);
+  Tft.setFillColor(LCD_BG);
   Tft.setupScrollArea(WS_SCREEN_SIZE_Y, 0, 0);
 }
 
@@ -36,21 +37,17 @@ void LCDTerminal::print(char c) {
       return;
     case '\b' :
       if(_x_pos > 0) {
+        _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll; 
+        Tft.fillScreen((INT16U)(_x_pos-1)*WS_CHAR_S_X, (INT16U)(_x_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff-1)*WS_CHAR_S_Y, (INT16U)_yeff*WS_CHAR_S_Y);
         _x_pos--;
-        Tft.setBgColor(WS_BG_COLOR);
-        Tft.setFillColor(LCD_BG); 
-        _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll;
-        Tft.fillScreen((INT16U)_x_pos*WS_CHAR_S_X, (INT16U)(_x_pos+1)*WS_CHAR_S_X-1, (INT16U)(_yeff-1)*WS_CHAR_S_Y, (INT16U)_yeff*WS_CHAR_S_Y);
       }
       return;
     default:;  
   }
   
-  if(_y_pos<WS_CHAR_N_Y)
-    Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_y_pos*WS_CHAR_S_Y);
-  else // scroll mode bottom line  
-    Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)(_y_scroll-1)*WS_CHAR_S_Y);
-  
+  _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1;
+  Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_yeff*WS_CHAR_S_Y);
+
   if(++_x_pos >= WS_CHAR_N_X) advance_y();
  
 }
@@ -64,16 +61,11 @@ void LCDTerminal::advance_y() {
 }
   
 void LCDTerminal::scroll() {
-  //INT16U bot;
   if(++_y_scroll > WS_CHAR_N_Y) {
     _y_scroll=1;
   }
-  Tft.scrollAddress((INT16U)(_y_scroll)*WS_CHAR_S_Y);
-  Tft.setBgColor(WS_BG_COLOR);
-  Tft.setFillColor(LCD_BG); 
-  //bot = (WS_SCREEN_SIZE_Y+_y_scroll*WS_CHAR_S_Y)%WS_SCREEN_SIZE_Y
+  Tft.scrollAddress((INT16U)(_y_scroll)*WS_CHAR_S_Y); 
   Tft.fillScreen(0, WS_SCREEN_SIZE_X-1, (INT16U)(_y_scroll-1)*WS_CHAR_S_Y, (INT16U)_y_scroll*WS_CHAR_S_Y);
-  //Tft.drawCharLowRAM('>', 0, (INT16U)(_y_scroll-1)*WS_CHAR_S_Y);
 }
 
 
