@@ -61,8 +61,8 @@
 
 //SPI DEFS:
 //2453
-//MOSI P1_7
-//MISO P1_6
+//MOSI P1_6
+//MISO P1_7
 //SCLK P1_5
 //CS pin P2.0
 //DC pin P2.5

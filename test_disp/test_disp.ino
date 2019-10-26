@@ -14,7 +14,9 @@ void setup()
   pinMode(RED_LED,OUTPUT);
   t.init();  
   delay(100);
-  for(int j=0;j<WS_CHAR_N_Y;j++)
+  t.println("TERM v1.0");
+  
+  for(int j=0;j<WS_CHAR_N_Y-2;j++)
     for(int i=0; i<WS_CHAR_N_X; i++)    
     t.print('a'+j);
     
@@ -24,9 +26,12 @@ void setup()
 void loop()
 {
    digitalWrite(RED_LED, HIGH);
+   t.showCursor();
    delay(500);
+   t.hideCursor();
    digitalWrite(RED_LED, LOW);
    delay(500);
+   
    for(int i=0; i<WS_CHAR_N_X; i++)    
      t.print('0'+c); 
    if(++c>=10) {
@@ -36,5 +41,6 @@ void loop()
      t.print(sep);
      t.println("@@@");
    }  
+   
 }
 

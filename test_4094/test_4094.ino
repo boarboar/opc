@@ -84,6 +84,10 @@ uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 uint8_t shift_pressed=0;
 uint8_t fn_pressed=0;
 
+//#define F_SHIFT_PRES  0x01
+//#define F_FN_PRES     0x02
+
+//uint8_t flags;
 char key_pressed=0;
 uint8_t rep = 0;
 uint32_t t;
