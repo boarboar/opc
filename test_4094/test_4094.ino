@@ -1,16 +1,5 @@
-/*
-  Blink
-  The basic Energia example.
-  Turns on an LED on for one second, then off for one second, repeatedly.
-  Change the LED define to blink other LEDs.
-  
-  Hardware Required:
-  * LaunchPad with an LED
-  
-  This example code is in the public domain.
-*/
 
-// most launchpads have a red LED
+
 #define KB_LED RED_LED
 //#define REQ_LED GREEN_LED
 
@@ -51,13 +40,17 @@ uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 
 #define KEY_SHIFT   0xff
 #define KEY_FN      0xfe
+#define KEY_ESC_LAST   0xfd
 #define KEY_ESC_R   0xfd  // escape seq
 #define KEY_ESC_D   0xfc  // escape seq
 #define KEY_ESC_U   0xfb  // escape seq
 #define KEY_ESC_L   0xfa  // escape seq
+#define KEY_ESC_FIRST   0xfa
 #define KEY_CTRL_C  0x3
 #define KEY_CTRL_D  0x4
 #define KEY_ESC     0x1b
+
+
 
 uint8_t keymap[ROW_COUNT][COL_COUNT] = {  // for SHFT test
 {KEY_SHIFT, '2', '3', '4', '5', '6', '7', '8', '9', '0'},
@@ -138,16 +131,16 @@ void loop() {
 
 void key_loop() {
   uint16_t u=1;
-  for (int col = 0; col < COL_COUNT; col++)   
+  uint16_t mask;
+  for (uint8_t col = 0; col < COL_COUNT; col++)   
   {
-    uint16_t mask=~u;
-
+    mask=~u;
     digitalWrite(latchPin, HIGH); //Pull latch HIGH to send data
     shiftOut(dataPin, clockPin, MSBFIRST, mask>>8); //Send the data HIBYTE
     shiftOut(dataPin, clockPin, MSBFIRST, mask&0xFF); //Send the data LOBYTE
     digitalWrite(latchPin, LOW); // Pull latch LOW to stop sending data
     
-    for(int row=0; row<ROW_COUNT; row++) {
+    for(uint8_t row=0; row<ROW_COUNT; row++) {
       uint16_t rval=digitalRead(rowPins[row]);
       
       if(rval==LOW) { // DN
@@ -169,7 +162,27 @@ void key_loop() {
                 if(key) {
                   key_pressed = key;
                   rep=0;
+                  if(key <= KEY_ESC_LAST && key >= KEY_ESC_FIRST) {
+                    Serial.print('\x1b'); //ESC
+                    Serial.print('[');
+                    switch(key) {
+                      case (char)KEY_ESC_L:
+                        key='D';
+                        break;
+                      case (char)KEY_ESC_R:
+                        key='C';
+                        break;
+                      case (char)KEY_ESC_U:
+                        key='A';
+                        break;
+                      case (char)KEY_ESC_D:
+                        key='B';
+                        break;  
+                      default:;                      
+                    }
+                  }
                   Serial.print(key);
+                  
                 }
               /*  
                 Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
