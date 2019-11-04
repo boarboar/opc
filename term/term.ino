@@ -15,11 +15,24 @@ const byte ROW_COUNT = 4;
 
 const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_4}; //can't use P1_5 - spi clk
 
-#define STATE_UP    0
-#define STATE_TO_DN 1
-#define STATE_DN    2
-#define STATE_TO_UP 3
-uint8_t state[COL_COUNT][ROW_COUNT] __attribute__((packed)) = {STATE_UP};
+//#define STATE_UP    0
+//#define STATE_TO_DN 1
+//#define STATE_DN    2
+//#define STATE_TO_UP 3
+//uint8_t state[COL_COUNT][ROW_COUNT] __attribute__((packed)) = {STATE_UP};
+
+
+#define  KEY_COUNT_BYTES ((COL_COUNT*ROW_COUNT-1)/8+1)
+uint8_t  key_dn[KEY_COUNT_BYTES] = {0};
+uint8_t  key_in[KEY_COUNT_BYTES] = {0};
+
+#define  SCAN_CODE(R, C) ((R)*COL_COUNT+(C))
+#define  IS_KEY_DN(S)  (key_dn[(S)/8] & (1<<((S)%8)))    
+#define  IS_KEY_IN(S)  (key_in[(S)/8] & (1<<((S)%8)))
+#define  SET_KEY_DN(S)  (key_dn[(S)/8] |= (1<<((S)%8)))
+#define  CLR_KEY_DN(S)  (key_dn[(S)/8] &= ~(1<<((S)%8)))
+#define  SET_KEY_IN(S)  (key_in[(S)/8] |= (1<<((S)%8)))
+#define  CLR_KEY_IN(S)  (key_in[(S)/8] &= ~(1<<((S)%8)))
 
 /*
 uint8_t keymap[ROW_COUNT][COL_COUNT] = {
@@ -127,6 +140,7 @@ void loop() {
 void key_loop() {
   uint16_t u=1;
   uint16_t mask;
+  uint8_t s, rval;
   for (uint8_t col = 0; col < COL_COUNT; col++)   
   {
     mask=~u;
@@ -135,17 +149,18 @@ void key_loop() {
     shiftOut(dataPin, clockPin, MSBFIRST, mask&0xFF); //Send the data LOBYTE
     digitalWrite(latchPin, LOW); // Pull latch LOW to stop sending data
     
-    for(uint8_t row=0; row<ROW_COUNT; row++) {
-      uint16_t rval=digitalRead(rowPins[row]);
-      
+    for(uint8_t row=0; row<ROW_COUNT; row++) { 
+      rval=digitalRead(rowPins[row]); // 16_t ???
+      s = SCAN_CODE(row, col);
       if(rval==LOW) { // DN
-        switch(state[col][row]) {
-          case STATE_UP : 
-            state[col][row] = STATE_TO_DN;
-            //Serial.print(col);Serial.print(",");Serial.print(row);Serial.println(" = TO_DN");
-            break;
-          case STATE_TO_DN : 
-            state[col][row] = STATE_DN;
+        if(IS_KEY_DN(s)) {
+          if(IS_KEY_IN(s)) CLR_KEY_IN(s); // clr attempt to up 
+        }
+        else {
+          if(IS_KEY_IN(s)) { // do key logic
+            CLR_KEY_IN(s);
+            SET_KEY_DN(s);
+            
             switch(keymap[row][col]) {              
               case KEY_SHIFT: flags|=F_SHIFT_PRES; break;
               case KEY_FN: flags|=F_FN_PRES; break;
@@ -182,30 +197,28 @@ void key_loop() {
                   term.print(key);
                   
                 }
-              /*  
-                Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
-                Serial.print((char)keymap[row][col]);
-                if(shift_pressed) Serial.print(" SHIFT ");
-                if(fn_pressed) Serial.print(" FN ");
-                Serial.println(")");
-                */
+               
+              //  Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
+              //  Serial.print((char)keymap[row][col]);
+              //  if(shift_pressed) Serial.print(" SHIFT ");
+              //  if(fn_pressed) Serial.print(" FN ");
+              //  Serial.println(")");
+              
             }
             digitalWrite(KB_LED, HIGH); 
-            break;
-          case STATE_TO_UP : 
-            state[col][row] = STATE_DN;
-            //Serial.print(col);Serial.print(",");Serial.print(row);Serial.println(" = BDN");
-            break;
-          default: break;  
+            
+          }
+          else {
+            SET_KEY_IN(s); // suspect to dn
+          }
         }
-      } else { // UP
-        switch(state[col][row]) {
-          case STATE_DN : 
-            state[col][row] = STATE_TO_UP;
-            //Serial.print(col);Serial.print(",");Serial.print(row);Serial.println(" = TO_UP");
-            break;
-          case STATE_TO_UP : 
-            state[col][row] = STATE_UP;
+      } 
+      else { // key_up
+        if(IS_KEY_DN(s)) {
+          if(IS_KEY_IN(s)) { // release key
+            CLR_KEY_IN(s);
+            CLR_KEY_DN(s);
+            
             switch(keymap[row][col]) {
               case KEY_SHIFT: flags&=~F_SHIFT_PRES; break;
               case KEY_FN: flags&=~F_FN_PRES; break;
@@ -216,12 +229,13 @@ void key_loop() {
                 //Serial.println(")");
             }
             digitalWrite(KB_LED, LOW); 
-            break;
-          case STATE_TO_DN : 
-            state[col][row] = STATE_UP;
-            //Serial.print(col);Serial.print(",");Serial.print(row);Serial.println(" = BUP");
-            break;
-          default: break;  
+            
+          } 
+          else {
+            SET_KEY_IN(s); // suspect to up
+          }
+        } else {
+          CLR_KEY_IN(s);
         }
       }
     }
