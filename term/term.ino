@@ -15,13 +15,6 @@ const byte ROW_COUNT = 4;
 
 const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_4}; //can't use P1_5 - spi clk
 
-//#define STATE_UP    0
-//#define STATE_TO_DN 1
-//#define STATE_DN    2
-//#define STATE_TO_UP 3
-//uint8_t state[COL_COUNT][ROW_COUNT] __attribute__((packed)) = {STATE_UP};
-
-
 #define  KEY_COUNT_BYTES ((COL_COUNT*ROW_COUNT-1)/8+1)
 uint8_t  key_dn[KEY_COUNT_BYTES] = {0};
 uint8_t  key_in[KEY_COUNT_BYTES] = {0};
@@ -33,15 +26,6 @@ uint8_t  key_in[KEY_COUNT_BYTES] = {0};
 #define  CLR_KEY_DN(S)  (key_dn[(S)/8] &= ~(1<<((S)%8)))
 #define  SET_KEY_IN(S)  (key_in[(S)/8] |= (1<<((S)%8)))
 #define  CLR_KEY_IN(S)  (key_in[(S)/8] &= ~(1<<((S)%8)))
-
-/*
-uint8_t keymap[ROW_COUNT][COL_COUNT] = {
-{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
-{'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
-{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
-{KEY_SHIFT, KEY_FN, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
-};
-*/
 
 #define KEY_SHIFT   0xff
 #define KEY_FN      0xfe
@@ -61,6 +45,15 @@ uint8_t keymap[ROW_COUNT][COL_COUNT] = {  // for SHFT test
 {'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
 {'?', '?', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
 };
+
+/*
+uint8_t keymap[ROW_COUNT][COL_COUNT] = {
+{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
+{'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
+{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
+{KEY_SHIFT, KEY_FN, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
+};
+*/
 
 uint8_t keymap_shift[ROW_COUNT][COL_COUNT] = 
 {
@@ -89,7 +82,7 @@ uint32_t t;
 
 #define SCAN_DELAY 20
 #define REP_COUNT  10
-#define CURSOR_COUNT  10
+#define CURSOR_COUNT  16
 
 void setup() {                
   // initialize the digital pin as an output.
@@ -98,32 +91,25 @@ void setup() {
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
-  
-  //pinMode(reqPin, INPUT_PULLUP);
-  //pinMode(clockReqPin, OUTPUT);
-  //pinMode(dataReqPin, OUTPUT);
-
+ 
   for(int row=0; row<ROW_COUNT; row++) pinMode(rowPins[row], INPUT_PULLUP);  
   
-  //attachInterrupt(reqPin, req_irq, FALLING);
-  
-  //digitalWrite(REQ_LED, HIGH);
-  //delay(100);
-  //digitalWrite(REQ_LED, LOW);
   digitalWrite(KB_LED, HIGH);
-  Serial.begin(9600); 
-  
+  Serial.begin(9600);  
   term.init();  
-  delay(100);
+  delay(10);
+  while(Serial.available()>0) Serial.read(); // clear input
   term.println("TERM v1.0");
   digitalWrite(KB_LED, LOW);
-
   t=millis();
 }
 
 void loop() {
-  if(millis()<t) {
-    // wraparound
+  while(Serial.available()>0) {
+    byte b = Serial.read(); 
+    term.print((char)b);
+  }
+  if(millis()<t) { // wraparound
     t=millis();
     return;
   }
@@ -137,7 +123,7 @@ void loop() {
   }
 }
 
-void key_loop() {
+inline void key_loop() {
   uint16_t u=1;
   uint16_t mask;
   uint8_t s, rval;
@@ -194,19 +180,10 @@ void key_loop() {
                     }
                   }
                   Serial.print(key);
-                  term.print(key);
-                  
+                  term.print(key);          
                 }
-               
-              //  Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = DN (");
-              //  Serial.print((char)keymap[row][col]);
-              //  if(shift_pressed) Serial.print(" SHIFT ");
-              //  if(fn_pressed) Serial.print(" FN ");
-              //  Serial.println(")");
-              
             }
-            digitalWrite(KB_LED, HIGH); 
-            
+            digitalWrite(KB_LED, HIGH);             
           }
           else {
             SET_KEY_IN(s); // suspect to dn
@@ -224,9 +201,6 @@ void key_loop() {
               case KEY_FN: flags&=~F_FN_PRES; break;
               default:;
                 key_pressed=0;
-                //Serial.print(col);Serial.print(",");Serial.print(row);Serial.print(" = UP (");
-                //Serial.print((char)keymap[row][col]);
-                //Serial.println(")");
             }
             digitalWrite(KB_LED, LOW); 
             
@@ -244,6 +218,7 @@ void key_loop() {
   
   if(key_pressed && rep++>=REP_COUNT) {
     Serial.print(key_pressed);
+    term.print(key_pressed);
     rep=0;
   }
 }
