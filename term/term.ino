@@ -81,7 +81,7 @@ uint8_t rep = 0;
 uint32_t t;
 
 #define SCAN_DELAY 20
-#define REP_COUNT  10
+#define REP_COUNT  20
 #define CURSOR_COUNT  16
 
 void setup() {                
@@ -107,7 +107,8 @@ void setup() {
 void loop() {
   while(Serial.available()>0) {
     byte b = Serial.read(); 
-    term.print((char)b);
+    term.printc((char)b);
+    //Serial.print((char)b);
   }
   if(millis()<t) { // wraparound
     t=millis();
@@ -125,14 +126,14 @@ void loop() {
 
 inline void key_loop() {
   uint16_t u=1;
-  uint16_t mask;
-  uint8_t s, rval;
   for (uint8_t col = 0; col < COL_COUNT; col++)   
   {
-    mask=~u;
+    //uint16_t mask;
+    uint8_t s, rval;
+    //mask=~u;
     digitalWrite(latchPin, HIGH); //Pull latch HIGH to send data
-    shiftOut(dataPin, clockPin, MSBFIRST, mask>>8); //Send the data HIBYTE
-    shiftOut(dataPin, clockPin, MSBFIRST, mask&0xFF); //Send the data LOBYTE
+    shiftOut(dataPin, clockPin, MSBFIRST, (~u)>>8); //Send the data HIBYTE
+    shiftOut(dataPin, clockPin, MSBFIRST, (~u)&0xFF); //Send the data LOBYTE
     digitalWrite(latchPin, LOW); // Pull latch LOW to stop sending data
     
     for(uint8_t row=0; row<ROW_COUNT; row++) { 
@@ -160,9 +161,9 @@ inline void key_loop() {
                   rep=0;
                   if(key <= KEY_ESC_LAST && key >= KEY_ESC_FIRST) {
                     Serial.print('\x1b'); //ESC
-                    term.print('\x1b');
+                    term.printc('\x1b');
                     Serial.print('[');
-                    term.print('[');
+                    term.printc('[');
                     switch(key) {
                       case (char)KEY_ESC_L:
                         key='D';
@@ -180,7 +181,7 @@ inline void key_loop() {
                     }
                   }
                   Serial.print(key);
-                  term.print(key);          
+                  term.printc(key);          
                 }
             }
             digitalWrite(KB_LED, HIGH);             
@@ -218,7 +219,7 @@ inline void key_loop() {
   
   if(key_pressed && rep++>=REP_COUNT) {
     Serial.print(key_pressed);
-    term.print(key_pressed);
+    term.printc(key_pressed);
     rep=0;
   }
 }

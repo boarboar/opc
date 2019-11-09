@@ -22,20 +22,20 @@ void LCDTerminal::lcd_defaults() {
   _flags |= WS_F_CUR_ON;
 }
 
-void LCDTerminal::print(const char *s) {
+void LCDTerminal::prints(const char *s) {
   if(_flags & WS_F_CUR_ON) {
     _flags |= WS_F_CUR_SUPP;
     cursorOff();
   }
   const char *p = s;
-  while(*p) print(*p++);
+  while(*p) printc(*p++);
   if(_flags & WS_F_CUR_SUPP) {
     _flags |= WS_F_CUR_ON;
     cursorOn();
   }
 }
   
-void LCDTerminal::print(char c) {  
+void LCDTerminal::printc(char c) {  
   hideCursor();
   switch(c) {
     case '\n' :
