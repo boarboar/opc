@@ -1,0 +1,4 @@
+1. backsp clears the chars on prev row
+2. after scrallup cursor on first row
+3. todo - serial speed select
+4. todo - echo on off
