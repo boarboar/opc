@@ -48,9 +48,9 @@ void LCDTerminal::printc(char c) {
       break;
     case '\b' :
       if(_x_pos > 0) {
-        _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll; 
+        _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
         Tft.setFillColor(LCD_BG);
-        Tft.fillScreen((INT16U)(_x_pos-1)*WS_CHAR_S_X, (INT16U)(_x_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff-1)*WS_CHAR_S_Y, (INT16U)_yeff*WS_CHAR_S_Y);
+        Tft.fillScreen((INT16U)(_x_pos-1)*WS_CHAR_S_X, (INT16U)(_x_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
         _x_pos--;
       }
       break;
@@ -83,7 +83,7 @@ void LCDTerminal::showCursor() {
  if(_flags&WS_F_CUR_ON && !(_flags&WS_F_CUR_VIS)) 
   {
     //Serial.println("ON");
-    _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll; 
+    _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
     Tft.setFillColor(LCD_FG);
     Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X+2, (INT16U)(_x_pos+1)*WS_CHAR_S_X-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2);
     _flags |= WS_F_CUR_VIS;
@@ -94,7 +94,7 @@ void LCDTerminal::hideCursor() {
   if( _flags&WS_F_CUR_ON && _flags&WS_F_CUR_VIS) 
   {
     //Serial.println("OFF");
-    _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll; 
+    _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
     Tft.setFillColor(LCD_BG);
     Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X+2, (INT16U)(_x_pos+1)*WS_CHAR_S_X-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-1);
     _flags &= ~WS_F_CUR_VIS;
