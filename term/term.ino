@@ -35,18 +35,11 @@ uint8_t  key_in[KEY_COUNT_BYTES] = {0};
 #define KEY_ESC_U   0xfb  // escape seq
 #define KEY_ESC_L   0xfa  // escape seq
 #define KEY_ESC_FIRST   0xfa
+#define KEY_SERIAL_SPEED   0xf9
+#define KEY_SERIAL_ECHO    0xf8
 #define KEY_CTRL_C  0x3
 #define KEY_CTRL_D  0x4
 #define KEY_ESC     0x1b
-
-/*
-uint8_t keymap[ROW_COUNT][COL_COUNT] = {  // for SHFT test
-{KEY_SHIFT, '2', '3', '4', '5', '6', '7', '8', '9', '0'},
-{KEY_FN, 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
-{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
-{'?', '?', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
-};
-*/
 
 uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
@@ -68,17 +61,19 @@ uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 {KEY_ESC,  KEY_CTRL_C, KEY_CTRL_D, 0, 0, KEY_ESC_L, KEY_ESC_U, KEY_ESC_D, KEY_ESC_R, '\b'},  //  l, u, d, r, bsp
 {'\t', '~', 0, 0, '-', '_', '=', '+', '\\', '|'},
 {0, 0, ';', ':', '"', '\'', '[', '{', ']', '}'},
-{0,0,0,0,',','<', '.', '>', '/', '?'}
+{0,0,KEY_SERIAL_SPEED, KEY_SERIAL_ECHO,',','<', '.', '>', '/', '?'}
 };
 
 
 #define F_SHIFT_PRES  0x01
 #define F_FN_PRES     0x02
+#define F_SER_ECHO_ON  0x10
 
 uint8_t cursor_cnt=0;
-uint8_t flags=0;
+uint8_t flags=F_SER_ECHO_ON;
 char key_pressed=0;
 uint8_t rep = 0;
+uint8_t speed=0; // todo - table idx
 uint32_t t;
 
 #define SCAN_DELAY 20
@@ -106,10 +101,13 @@ void setup() {
 }
 
 void loop() {
-  while(Serial.available()>0) {
+  {
+  uint16_t cc=0;  
+  while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
     byte b = Serial.read(); 
     term.printc((char)b);
     //Serial.print((char)b);
+  }
   }
   if(millis()<t) { // wraparound
     t=millis();
@@ -129,9 +127,8 @@ inline void key_loop() {
   uint16_t u=1;
   for (uint8_t col = 0; col < COL_COUNT; col++)   
   {
-    //uint16_t mask;
     uint8_t s, rval;
-    //mask=~u;
+    
     digitalWrite(latchPin, HIGH); //Pull latch HIGH to send data
     shiftOut(dataPin, clockPin, MSBFIRST, (~u)>>8); //Send the data HIBYTE
     shiftOut(dataPin, clockPin, MSBFIRST, (~u)&0xFF); //Send the data LOBYTE
@@ -157,32 +154,48 @@ inline void key_loop() {
                   flags&F_SHIFT_PRES ? keymap_shift[row][col] :
                   flags&F_FN_PRES ? keymap_fn[row][col] :
                   keymap[row][col];
+                if((uint8_t)key==KEY_SERIAL_SPEED) {
+                  speed = (speed+1)%2; // test 0..1
+                  Serial.flush();
+                  Serial.begin(speed==0?9600:115200); // test
+                  term.println(speed==0?"[9600]":"[115200]");
+                  key=0;
+                } else if((uint8_t)key==KEY_SERIAL_ECHO) {
+                  if(flags&F_SER_ECHO_ON) {
+                    flags&=~F_SER_ECHO_ON;
+                    term.println("[ECHO OFF]");
+                  } else {
+                    flags|=F_SER_ECHO_ON;
+                    term.println("[ECHO ON]");
+                  }
+                  key=0;
+                }
                 if(key) {
                   key_pressed = key;
                   rep=0;
-                  if(key <= KEY_ESC_LAST && key >= KEY_ESC_FIRST) {
+                  if((uint8_t)key <= KEY_ESC_LAST && (uint8_t)key >= KEY_ESC_FIRST) {
                     Serial.print('\x1b'); //ESC
                     term.printc('\x1b');
                     Serial.print('[');
                     term.printc('[');
-                    switch(key) {
-                      case (char)KEY_ESC_L:
+                    switch((uint8_t)key) {
+                      case KEY_ESC_L:
                         key='D';
                         break;
-                      case (char)KEY_ESC_R:
+                      case KEY_ESC_R:
                         key='C';
                         break;
-                      case (char)KEY_ESC_U:
+                      case KEY_ESC_U:
                         key='A';
                         break;
-                      case (char)KEY_ESC_D:
+                      case KEY_ESC_D:
                         key='B';
                         break;  
                       default:;                      
                     }
                   }
                   Serial.print(key);
-                  term.printc(key);          
+                  if(flags&F_SER_ECHO_ON) term.printc(key);          
                 }
             }
             digitalWrite(KB_LED, HIGH);             
@@ -196,16 +209,14 @@ inline void key_loop() {
         if(IS_KEY_DN(s)) {
           if(IS_KEY_IN(s)) { // release key
             CLR_KEY_IN(s);
-            CLR_KEY_DN(s);
-            
+            CLR_KEY_DN(s);        
             switch(keymap[row][col]) {
               case KEY_SHIFT: flags&=~F_SHIFT_PRES; break;
               case KEY_FN: flags&=~F_FN_PRES; break;
               default:;
                 key_pressed=0;
             }
-            digitalWrite(KB_LED, LOW); 
-            
+            digitalWrite(KB_LED, LOW);             
           } 
           else {
             SET_KEY_IN(s); // suspect to up
