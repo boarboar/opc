@@ -101,13 +101,15 @@ void setup() {
 }
 
 void loop() {
-  {
-  uint16_t cc=0;  
-  while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
-    byte b = Serial.read(); 
-    term.printc((char)b);
-    //Serial.print((char)b);
-  }
+  if(Serial.available()>0) {
+    uint16_t cc=0;  
+    term.hideCursor();
+    while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
+      byte b = Serial.read(); 
+      term.printc((char)b, false);
+      //Serial.print((char)b);
+    }
+    term.showCursor();
   }
   if(millis()<t) { // wraparound
     t=millis();
@@ -235,4 +237,3 @@ inline void key_loop() {
     rep=0;
   }
 }
-

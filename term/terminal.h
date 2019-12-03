@@ -36,7 +36,7 @@ public:
   inline void cursorOn() {_flags |= WS_F_CUR_ON; showCursor();}
   inline void cursorOff() {hideCursor(); _flags &= ~WS_F_CUR_ON;}
   inline void cursorBlink() {if(_flags & WS_F_CUR_VIS) hideCursor(); else showCursor();} 
-  void printc(char c);
+  void printc(char c, bool cctrl=true);
   void prints(const char *s);
   inline void println(const char *s) {prints(s); printc('\n');}
   void scroll();

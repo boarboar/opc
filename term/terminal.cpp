@@ -35,8 +35,8 @@ void LCDTerminal::prints(const char *s) {
   }
 }
   
-void LCDTerminal::printc(char c) {  
-  hideCursor();
+void LCDTerminal::printc(char c, bool cctrl) {  
+  if(cctrl) hideCursor();
   switch(c) {
     case '\n' :
     case '\r' :
@@ -59,7 +59,7 @@ void LCDTerminal::printc(char c) {
       Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_yeff*WS_CHAR_S_Y);
       if(++_x_pos >= WS_CHAR_N_X) advance_y();
   }
-  showCursor();
+  if(cctrl) showCursor();
 }
 
 void LCDTerminal::advance_y() {
@@ -100,4 +100,3 @@ void LCDTerminal::hideCursor() {
     _flags &= ~WS_F_CUR_VIS;
   }
 }
-
