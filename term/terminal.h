@@ -16,6 +16,7 @@
 
 #define WS_BG_COLOR  BLACK
 #define WS_FG_COLOR  GREEN
+#define WS_FG_COLOR_CTRL  YELLOW
 
 #define WS_CHAR_DEF_SIZE 2
 #define WS_CHAR_S_X  (WS_CHAR_DEF_SIZE*FONT_SPACE)
@@ -35,13 +36,17 @@ public:
   void lcd_defaults();
   inline void cursorOn() {_flags |= WS_F_CUR_ON; showCursor();}
   inline void cursorOff() {hideCursor(); _flags &= ~WS_F_CUR_ON;}
+  inline void cursorSuppressOn() {if(_flags & WS_F_CUR_ON) {_flags |= WS_F_CUR_SUPP;cursorOff();}}
+  inline void cursorSuppressOff() {if(_flags & WS_F_CUR_SUPP) {_flags |= WS_F_CUR_ON;cursorOn();}}
   inline void cursorBlink() {if(_flags & WS_F_CUR_VIS) hideCursor(); else showCursor();} 
-  void printc(char c, bool cctrl=true);
+  void printc(char c);
   void prints(const char *s);
   inline void println(const char *s) {prints(s); printc('\n');}
   void scroll();
   void showCursor();
   void hideCursor();
+  inline void setDataColor() {Tft.setFgColor(WS_FG_COLOR);}
+  inline void setCtrlColor() {Tft.setFgColor(WS_FG_COLOR_CTRL);}
 protected:  
   TFT Tft;
   uint8_t _y_pos; 

@@ -23,20 +23,16 @@ void LCDTerminal::lcd_defaults() {
 }
 
 void LCDTerminal::prints(const char *s) {
-  if(_flags & WS_F_CUR_ON) {
-    _flags |= WS_F_CUR_SUPP;
-    cursorOff();
-  }
+  setCtrlColor();
+  cursorSuppressOn();
   const char *p = s;
   while(*p) printc(*p++);
-  if(_flags & WS_F_CUR_SUPP) {
-    _flags |= WS_F_CUR_ON;
-    cursorOn();
-  }
+  cursorSuppressOff();
+  setDataColor();
 }
   
-void LCDTerminal::printc(char c, bool cctrl) {  
-  if(cctrl) hideCursor();
+void LCDTerminal::printc(char c) {  
+  if(!(_flags & WS_F_CUR_SUPP)) hideCursor();
   switch(c) {
     case '\n' :
     case '\r' :
@@ -59,7 +55,7 @@ void LCDTerminal::printc(char c, bool cctrl) {
       Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_yeff*WS_CHAR_S_Y);
       if(++_x_pos >= WS_CHAR_N_X) advance_y();
   }
-  if(cctrl) showCursor();
+  if(!(_flags & WS_F_CUR_SUPP)) showCursor();
 }
 
 void LCDTerminal::advance_y() {

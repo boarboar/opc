@@ -64,6 +64,9 @@ uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 {0,0,KEY_SERIAL_SPEED, KEY_SERIAL_ECHO,',','<', '.', '>', '/', '?'}
 };
 
+#define SERIAL_RATES_N  5
+uint16_t serial_rates[]={9600, 19200, 38400, 57600, 115200};
+const char *serial_rates_descr[]={"9600", "19200", "38400", "57600", "115200"};
 
 #define F_SHIFT_PRES  0x01
 #define F_FN_PRES     0x02
@@ -73,7 +76,7 @@ uint8_t cursor_cnt=0;
 uint8_t flags=F_SER_ECHO_ON;
 char key_pressed=0;
 uint8_t rep = 0;
-uint8_t speed=0; // todo - table idx
+uint8_t serial_rate_idx=0; //9600
 uint32_t t;
 
 #define SCAN_DELAY 20
@@ -103,13 +106,13 @@ void setup() {
 void loop() {
   if(Serial.available()>0) {
     uint16_t cc=0;  
-    term.hideCursor();
+    term.cursorSuppressOn();
     while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
       byte b = Serial.read(); 
-      term.printc((char)b, false);
+      term.printc((char)b);
       //Serial.print((char)b);
     }
-    term.showCursor();
+    term.cursorSuppressOff();
   }
   if(millis()<t) { // wraparound
     t=millis();
@@ -157,14 +160,14 @@ inline void key_loop() {
                   flags&F_FN_PRES ? keymap_fn[row][col] :
                   keymap[row][col];
                 if((uint8_t)key==KEY_SERIAL_SPEED) {
-                  speed = (speed+1)%2; // test 0..1
+                  serial_rate_idx = (serial_rate_idx+1)%SERIAL_RATES_N; 
                   Serial.flush();
-                  Serial.begin(speed==0?9600:115200); // test
-                  term.println(speed==0?"[9600]":"[115200]");
+                  Serial.begin(serial_rates[serial_rate_idx]); 
+                  term.println(serial_rates_descr[serial_rate_idx]);
                   key=0;
-                } else if((uint8_t)key==KEY_SERIAL_ECHO) {
+                } else if((uint8_t)key==KEY_SERIAL_ECHO) {                  
                   if(flags&F_SER_ECHO_ON) {
-                    flags&=~F_SER_ECHO_ON;
+                    flags&=~F_SER_ECHO_ON;                    
                     term.println("[ECHO OFF]");
                   } else {
                     flags|=F_SER_ECHO_ON;
