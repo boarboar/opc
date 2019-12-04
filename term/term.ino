@@ -106,13 +106,13 @@ void setup() {
 void loop() {
   if(Serial.available()>0) {
     uint16_t cc=0;  
-    term.cursorSuppressOn();
+    term.hideCursor();
     while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
       byte b = Serial.read(); 
-      term.printc((char)b);
+      term.printc((char)b, false);
       //Serial.print((char)b);
     }
-    term.cursorSuppressOff();
+    term.showCursor();
   }
   if(millis()<t) { // wraparound
     t=millis();
@@ -165,9 +165,9 @@ inline void key_loop() {
                   Serial.begin(serial_rates[serial_rate_idx]); 
                   term.println(serial_rates_descr[serial_rate_idx]);
                   key=0;
-                } else if((uint8_t)key==KEY_SERIAL_ECHO) {                  
+                } else if((uint8_t)key==KEY_SERIAL_ECHO) {
                   if(flags&F_SER_ECHO_ON) {
-                    flags&=~F_SER_ECHO_ON;                    
+                    flags&=~F_SER_ECHO_ON;
                     term.println("[ECHO OFF]");
                   } else {
                     flags|=F_SER_ECHO_ON;
