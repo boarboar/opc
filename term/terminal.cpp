@@ -27,8 +27,10 @@ void LCDTerminal::prints(const char *s) {
     _flags |= WS_F_CUR_SUPP;
     cursorOff();
   }
+  setCtrlColor();
   const char *p = s;
   while(*p) printc(*p++);
+  setDataColor();
   if(_flags & WS_F_CUR_SUPP) {
     _flags |= WS_F_CUR_ON;
     cursorOn();

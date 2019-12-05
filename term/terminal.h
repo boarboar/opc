@@ -16,6 +16,7 @@
 
 #define WS_BG_COLOR  BLACK
 #define WS_FG_COLOR  GREEN
+#define WS_FG_COLOR_CTRL  YELLOW
 
 #define WS_CHAR_DEF_SIZE 2
 #define WS_CHAR_S_X  (WS_CHAR_DEF_SIZE*FONT_SPACE)
@@ -42,6 +43,8 @@ public:
   void scroll();
   void showCursor();
   void hideCursor();
+  inline void setDataColor() {Tft.setFgColor(WS_FG_COLOR);}
+  inline void setCtrlColor() {Tft.setFgColor(WS_FG_COLOR_CTRL);}
 protected:  
   TFT Tft;
   uint8_t _y_pos; 

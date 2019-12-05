@@ -44,7 +44,7 @@ uint8_t  key_in[KEY_COUNT_BYTES] = {0};
 uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
 {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
-{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
+{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\n'},
 {KEY_SHIFT, KEY_FN, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
 };
 
@@ -53,7 +53,7 @@ uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 {
 {'!','@','#','$','%','^','&','*','(',')'},
 {'Q','W','E','R','T','Y','U','I','O','P'},
-{'A','S','D','F','G','H','J','K','L','\n'},
+{'A','S','D','F','G','H','J','K','L','\r'},
 {0, 0, 'Z','X','C','V','B','N','M',' '}
 };
 
@@ -66,7 +66,7 @@ uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 
 #define SERIAL_RATES_N  5
 const uint16_t serial_rates[]={9600, 19200, 38400, 57600, 115200};
-const char *serial_rates_descr[]={"9600", "19200", "38400", "57600", "115200"};
+const char *serial_rates_descr[]={"[9600]", "[19200]", "[38400]", "[57600]", "[115200]"};
 
 #define F_SHIFT_PRES  0x01
 #define F_FN_PRES     0x02
