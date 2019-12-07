@@ -65,7 +65,7 @@ uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 };
 
 #define SERIAL_RATES_N  5
-const uint16_t serial_rates[]={9600, 19200, 38400, 57600, 115200};
+const uint32_t serial_rates[]={9600, 19200, 38400, 57600, 115200};
 const char *serial_rates_descr[]={"[9600]", "[19200]", "[38400]", "[57600]", "[115200]"};
 
 #define F_SHIFT_PRES  0x01
