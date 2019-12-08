@@ -1,4 +1,9 @@
-1. backsp clears the chars on prev row - FIXED
-2. after scrallup cursor on first row - FIXED
-3. todo - serial speed select
-4. todo - echo on off
+0. key repeat - echo setting ignored
+1. cr / nl - change keymap
+2. check if kursor ctrl off works correctly on serial read
+3. las line len - use for scrall last line clr
+4. show serial settings on startup
+5. save settings in eprom
+6. \b results in 123->12?[K
+7. esc r ?{3    esc d ?[
+8. escp u:   123\n456 -> 14123
