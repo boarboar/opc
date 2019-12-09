@@ -5,6 +5,7 @@ void LCDTerminal::init() {
   _x_pos = _y_pos = 0;
   _y_scroll = 0;
   _flags = 0;
+  _prev_chr = 0;
   Tft.TFTinit();
   Tft.setOrientation(WS_ORIENT);  
   lcd_defaults();
@@ -40,8 +41,9 @@ void LCDTerminal::prints(const char *s) {
 void LCDTerminal::printc(char c, bool cctrl) {  
   if(cctrl) hideCursor();
   switch(c) {
-    case '\n' :
-    case '\r' :
+    case '\n' : //lf
+      if(_prev_chr=='\r') break;  // ignore CR LF
+    case '\r' : //cr    
       advance_y();
       break;
     case '\t' :  
@@ -56,11 +58,14 @@ void LCDTerminal::printc(char c, bool cctrl) {
         _x_pos--;
       }
       break;
+    case '\x1b' :
+      c =  '~';  // ESC
     default:
       _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1;
       Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_yeff*WS_CHAR_S_Y);
       if(++_x_pos >= WS_CHAR_N_X) advance_y();
   }
+  _prev_chr=c;
   if(cctrl) showCursor();
 }
 

@@ -44,7 +44,7 @@ uint8_t  key_in[KEY_COUNT_BYTES] = {0};
 uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
 {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
-{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\n'},
+{'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
 {KEY_SHIFT, KEY_FN, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
 };
 
@@ -53,7 +53,7 @@ uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 {
 {'!','@','#','$','%','^','&','*','(',')'},
 {'Q','W','E','R','T','Y','U','I','O','P'},
-{'A','S','D','F','G','H','J','K','L','\r'},
+{'A','S','D','F','G','H','J','K','L','\n'},
 {0, 0, 'Z','X','C','V','B','N','M',' '}
 };
 
@@ -83,6 +83,9 @@ uint32_t t;
 #define REP_COUNT  20
 #define CURSOR_COUNT  16
 
+#define EMIT(K) { Serial.print((K)); if(flags&F_SER_ECHO_ON) term.printc((K)); }  
+#define PRINT_ECHO_STATUS() {term.println((flags&F_SER_ECHO_ON) ? "[ECHO OFF]" : "[ECHO ON]");}
+
 void setup() {                
   // initialize the digital pin as an output.
   digitalWrite(KB_LED, LOW); 
@@ -98,7 +101,10 @@ void setup() {
   term.init();  
   delay(10);
   while(Serial.available()>0) Serial.read(); // clear input
-  term.println("TERM v1.0");
+  term.prints("TERM v1.01 "); 
+  term.prints(serial_rates_descr[serial_rate_idx]);
+  PRINT_ECHO_STATUS();
+  
   digitalWrite(KB_LED, LOW);
   t=millis();
 }
@@ -168,21 +174,27 @@ inline void key_loop() {
                 } else if((uint8_t)key==KEY_SERIAL_ECHO) {
                   if(flags&F_SER_ECHO_ON) {
                     flags&=~F_SER_ECHO_ON;
-                    term.println("[ECHO OFF]");
+                    //term.println("[ECHO OFF]");
                   } else {
                     flags|=F_SER_ECHO_ON;
-                    term.println("[ECHO ON]");
+                    //term.println("[ECHO ON]");
                   }
+                  PRINT_ECHO_STATUS();
                   key=0;
                 }
                 if(key) {
                   key_pressed = key;
                   rep=0;
                   if((uint8_t)key <= KEY_ESC_LAST && (uint8_t)key >= KEY_ESC_FIRST) {
+                    /*
                     Serial.print('\x1b'); //ESC
-                    term.printc('\x1b');
+                    if(flags&F_SER_ECHO_ON) term.printc('\x1b');
                     Serial.print('[');
-                    term.printc('[');
+                    if(flags&F_SER_ECHO_ON) term.printc('[');
+                    */
+                    // ESC
+                    EMIT('\x1b');
+                    EMIT('[');
                     switch((uint8_t)key) {
                       case KEY_ESC_L:
                         key='D';
@@ -199,8 +211,9 @@ inline void key_loop() {
                       default:;                      
                     }
                   }
-                  Serial.print(key);
-                  if(flags&F_SER_ECHO_ON) term.printc(key);          
+                  //Serial.print(key);
+                  //if(flags&F_SER_ECHO_ON) term.printc(key);          
+                  EMIT(key);
                 }
             }
             digitalWrite(KB_LED, HIGH);             
@@ -235,8 +248,9 @@ inline void key_loop() {
   }
   
   if(key_pressed && rep++>=REP_COUNT) {
-    Serial.print(key_pressed);
-    term.printc(key_pressed);
+    //Serial.print(key_pressed);
+    //if(flags&F_SER_ECHO_ON) term.printc(key_pressed);
+    EMIT(key_pressed);
     rep=0;
   }
 }

@@ -52,6 +52,7 @@ protected:
   uint8_t _y_scroll;  
   uint8_t _yeff;
   uint8_t _flags;
+  char  _prev_chr;
   void advance_y();
 
 };
