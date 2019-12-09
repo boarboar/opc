@@ -1,16 +1,24 @@
-0. key repeat - echo setting ignored || to test
-1. cr / nl - change keymap || to test
+0. key repeat - echo setting ignored || to test - OK
+1. cr / nl - change keymap || to test - OK
 2. check if cursor ctrl off works correctly on serial read || ok
-10. detect CR/LF || to test
-4. show serial settings on startup || to test
-15. display ESC as ~ (for tests)
+10. detect CR/LF || to test - OK
+4. show serial settings on startup || to test - OK - wrong echo status
+15. display ESC as ~ (for tests) - OK
  
 3. last line len - use for scroll last line clr
 5. save settings in eprom
-6. \b results in 123->12?[K - first back is our back, then probably ESC [ K 
+6. \b results in 123->12~[K - first back is our back, then probably ESC [ K 
 7. esc r ?{3    esc d ?[
 8. escp u:   123\n456 -> 14123
 9. test serial flow control: rise host CTS when ready, low when full  (D19 pin for ESP32)
 12. font sz 1 test
 13. check if we can optimize low level grph: send two int16 in one set; shouln't wee TFT_CS_HI after transfer? Check other implementations
 14. term print unknown chars as [HEX]
+
+15. echo print ststus - messed up
+
+~[0;32
+
+~[K
+
+ESC-LEFT emits backspace
