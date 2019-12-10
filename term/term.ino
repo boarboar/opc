@@ -84,7 +84,7 @@ uint32_t t;
 #define CURSOR_COUNT  16
 
 #define EMIT(K) { Serial.print((K)); if(flags&F_SER_ECHO_ON) term.printc((K)); }  
-#define PRINT_ECHO_STATUS() {term.println((flags&F_SER_ECHO_ON) ? "[ECHO OFF]" : "[ECHO ON]");}
+#define PRINT_ECHO_STATUS() {term.println((flags&F_SER_ECHO_ON) ? "[ECHO ON]" : "[ECHO OFF]");}
 
 void setup() {                
   // initialize the digital pin as an output.

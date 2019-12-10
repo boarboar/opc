@@ -30,6 +30,12 @@
 #define WS_F_CUR_VIS 0x02
 #define WS_F_CUR_SUPP 0x04
 
+#define ESC_CHAR '\x1b'
+
+#define ESC_STATE_0   1
+#define ESC_STATE_ESC 2
+#define ESC_STATE_CMD 3
+
 class LCDTerminal {
 public:
   void init();
@@ -52,7 +58,8 @@ protected:
   uint8_t _y_scroll;  
   uint8_t _yeff;
   uint8_t _flags;
-  char  _prev_chr;
+  char  _prev_chr;  
+  uint8_t _esc_state;
   void advance_y();
 
 };

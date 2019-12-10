@@ -92,7 +92,7 @@ void TFT::TFTinit (/*INT8U cs, INT8U dc*/)
     pinMode(_dc,OUTPUT);
 	
     SPI.begin();
-    SPI.setClockDivider(2);
+    SPI.setClockDivider(SPI_CLOCK_DIV2);
 	
 	// ??? try to comment
 /*
