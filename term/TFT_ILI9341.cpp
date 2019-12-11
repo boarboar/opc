@@ -5,6 +5,13 @@
 
 #include "TFT_ILI9341.h"
 #include <SPI.h>
+#include <msp430.h>
+#include <Energia.h>
+
+
+//#if defined(__MSP430_HAS_USCI_B0__) || defined(__MSP430_HAS_USCI_B1__) || defined(__MSP430_HAS_USCI__)
+//#error "USCI"
+//#define
 
 #define _cs P2_6 
 #define _dc P2_7 
@@ -20,6 +27,37 @@
 #define TFT_CS_HIGH {P2OUT |= BIT6;}
 #define TFT_DC_LOW  {P2OUT &= ~BIT7;}
 #define TFT_DC_HIGH {P2OUT |= BIT7;}
+
+#ifdef UC0IFG
+/* redefine or older 2xx devices where the flags are in SFR */
+#define UCB0IFG  UC0IFG   
+#define UCRXIFG  UCB0RXIFG
+#define UCTXIFG  UCB0TXIFG
+#endif
+
+inline static void spi_transmit(const uint8_t _data) {
+  	UCB0TXBUF = _data; // setting TXBUF clears the TXIFG flag
+
+	while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+	// clear RXIFG flag
+        UCB0IFG &= ~UCRXIFG;
+}
+
+inline static void spi_transmit16(const uint16_t data)
+{
+	/* Wait for previous tx to complete. */
+	while (!(UCB0IFG & UCTXIFG));   // do we need it?
+	/* Setting TXBUF clears the TXIFG flag. */
+	UCB0TXBUF = data | 0xFF;
+	/* Wait for previous tx to complete. */
+	while (!(UCB0IFG & UCTXIFG));
+	/* Setting TXBUF clears the TXIFG flag. */
+	UCB0TXBUF = data >> 8;
+
+	while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+	// clear RXIFG flag
+	UCB0IFG &= ~UCRXIFG;
+}
 
 const INT8U seq[]={
       4, 0xEF,    0x03,0x80,0x02, // try to uncomment
@@ -45,28 +83,31 @@ const INT8U seq[]={
     };
 
 
-void TFT::sendCMD(INT8U index)
+inline static void sendCMD(INT8U index)
 {
     TFT_DC_LOW;
     TFT_CS_LOW;
-    SPI.transfer(index);
+    //SPI.transfer(index);
+    spi_transmit(index);
     TFT_CS_HIGH;
 }
 
-void TFT::WRITE_DATA(INT8U data)
+inline static void WRITE_DATA(INT8U data) 
 {
     TFT_DC_HIGH;
     TFT_CS_LOW;
-    SPI.transfer(data);
+    //SPI.transfer(data);
+    spi_transmit(data);
     TFT_CS_HIGH;
 }
 
-void TFT::sendData(INT16U data)
+inline static void sendData(INT16U data)
 {
     TFT_DC_HIGH;
     TFT_CS_LOW;
-    SPI.transfer(data>>8);
-    SPI.transfer(data&0xff);
+    //SPI.transfer(data>>8);
+    //SPI.transfer(data&0xff);
+    spi_transmit16(data);
     TFT_CS_HIGH;
     
 }
@@ -182,25 +223,26 @@ void TFT::fillScreen(INT16 XL, INT16 XR, INT16 YU, INT16 YD)
     }
 }
 
-
-void TFT::drawChar( INT8U ascii, INT16U poX, INT16U poY)
-{   
-    if(_flags&LCD_OPAQ) { setFillColor(LCD_BG); fillScreen(poX, poX+FONT_SPACE*_size_mask_thick, poY, poY+FONT_Y*_size_mask_thick); }	
-    setFillColor(LCD_FG);
-    if((ascii<32)||(ascii>129)) ascii = '?';
-    for (INT8U i=0; i<FONT_SZ; i++, poX+=_size_mask_thick ) {
-        INT8U temp = simpleFont[ascii-0x20][i];
-        INT16U y=poY;
-        for(INT8U f=0;f<8;f++, y+=_size_mask_thick)
-        {
-            if((temp>>f)&0x01) // if bit is set in the font mask
-            {
-              fillScreen(poX, poX+_size_mask_thick, y, y+_size_mask_thick); //note - actually double size
-            }
-        }
-    }
-    setFillColor(LCD_BG);
+// ##############################################################################################
+// Setup a portion of the screen for vertical scrolling
+// ##############################################################################################
+// We are using a hardware feature of the display, so we can only scroll in portrait orientation
+void TFT::setupScrollArea(INT16U vsz, INT16U tfa, INT16U bfa) {
+  vsz-=(tfa+bfa);
+  sendCMD(ILI9341_VSCRDEF); // Vertical scroll definition
+  sendData(tfa);
+  sendData(vsz);
+  sendData(bfa);
 }
+
+// ##############################################################################################
+// Setup the vertical scrolling start address pointer
+// ##############################################################################################
+void TFT::scrollAddress(INT16U vsp) {
+  sendCMD(ILI9341_VSCRSADD); // Vertical scrolling pointer
+  sendData(vsp);
+}
+
 
 void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
 {   
@@ -234,7 +276,25 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
     }
     //setFillColor(LCD_BG);
 }
-
+/*
+void TFT::drawChar( INT8U ascii, INT16U poX, INT16U poY)
+{   
+    if(_flags&LCD_OPAQ) { setFillColor(LCD_BG); fillScreen(poX, poX+FONT_SPACE*_size_mask_thick, poY, poY+FONT_Y*_size_mask_thick); }	
+    setFillColor(LCD_FG);
+    if((ascii<32)||(ascii>129)) ascii = '?';
+    for (INT8U i=0; i<FONT_SZ; i++, poX+=_size_mask_thick ) {
+        INT8U temp = simpleFont[ascii-0x20][i];
+        INT16U y=poY;
+        for(INT8U f=0;f<8;f++, y+=_size_mask_thick)
+        {
+            if((temp>>f)&0x01) // if bit is set in the font mask
+            {
+              fillScreen(poX, poX+_size_mask_thick, y, y+_size_mask_thick); //note - actually double size
+            }
+        }
+    }
+    setFillColor(LCD_BG);
+}
 
 INT16U TFT::drawString(const char *string, INT16U poX, INT16U poY)
 {
@@ -242,7 +302,7 @@ INT16U TFT::drawString(const char *string, INT16U poX, INT16U poY)
     {
         drawCharLowRAM(*string, poX, poY);
         string++;
-        if(poX < getMaxX()) poX += FONT_SPACE*_size_mask_thick;   /* Move cursor right */
+        if(poX < getMaxX()) poX += FONT_SPACE*_size_mask_thick;   // Move cursor right 
         else break;
     }
     return poX;
@@ -378,27 +438,7 @@ void TFT::drawLineThickLowRAM8Bit(INT16 x0,INT16 y0,INT16 x1,INT16 y1)
         }
     }
 }
-
-
-// ##############################################################################################
-// Setup a portion of the screen for vertical scrolling
-// ##############################################################################################
-// We are using a hardware feature of the display, so we can only scroll in portrait orientation
-void TFT::setupScrollArea(INT16U vsz, INT16U tfa, INT16U bfa) {
-  vsz-=(tfa+bfa);
-  sendCMD(ILI9341_VSCRDEF); // Vertical scroll definition
-  sendData(tfa);
-  sendData(vsz);
-  sendData(bfa);
-}
-
-// ##############################################################################################
-// Setup the vertical scrolling start address pointer
-// ##############################################################################################
-void TFT::scrollAddress(INT16U vsp) {
-  sendCMD(ILI9341_VSCRSADD); // Vertical scrolling pointer
-  sendData(vsp);
-}
+*/
 
 /*        
 void TFT::drawRectangle(INT16 poX, INT16 poY, INT16U length, INT16U width)

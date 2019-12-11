@@ -5,6 +5,8 @@
 4. show serial settings on startup || to test - OK - wrong echo status - fixed || ok
 15. display ESC as ~ (for tests) - OK 
 3. last line len - use for scroll last line clr || TEST
+13. check if we can optimize low level grph: send two int16 in one set; shouln't wee TFT_CS_HI after transfer? Check other implementations
+   - test impl with direct usci registers interaction; if OK - rewrite fill and drawchar
 
 5. save settings in eprom
 6. \b results in 123->12~[K - first back is our back, then probably ESC [ K 
@@ -12,10 +14,9 @@
 8. escp u:   123\n456 -> 14123
 9. test serial flow control: rise host CTS when ready, low when full  (D19 pin for ESP32)
 12. font sz 1 test
-13. check if we can optimize low level grph: send two int16 in one set; shouln't wee TFT_CS_HI after transfer? Check other implementations
 14. term print unknown chars as [HEX]
 
-15. try with new Energia. Replace transfer(byte) with transfer16(word).  Then try to use transactions
+//15. try with new Energia. Replace transfer(byte) with transfer16(word).  Then try to use transactions
 
 ~[0;32m
 

@@ -2,6 +2,9 @@
 #include <SPI.h>
 #include "terminal.h"
 
+// 2552 USI
+// 2553 USCI
+
 LCDTerminal term;
 
 #define KB_LED RED_LED
