@@ -43,17 +43,15 @@ inline static void spi_transmit(const uint8_t _data) {
         UCB0IFG &= ~UCRXIFG;
 }
 
-inline static void spi_transmit16(const uint16_t data)
+inline static void spi_transmit16_msb(const uint16_t data)
 {
 	/* Wait for previous tx to complete. */
-	while (!(UCB0IFG & UCTXIFG));   // do we need it?
+	//while (!(UCB0IFG & UCTXIFG));   // do we need it?
 	/* Setting TXBUF clears the TXIFG flag. */
-	UCB0TXBUF = data | 0xFF;
-	/* Wait for previous tx to complete. */
+        UCB0TXBUF = data >> 8;	/* Wait for previous tx to complete. */
 	while (!(UCB0IFG & UCTXIFG));
-	/* Setting TXBUF clears the TXIFG flag. */
-	UCB0TXBUF = data >> 8;
-
+	/* Setting TXBUF clears the TXIFG flag. */	
+        UCB0TXBUF = data | 0xFF;
 	while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
 	// clear RXIFG flag
 	UCB0IFG &= ~UCRXIFG;
@@ -107,7 +105,9 @@ inline static void sendData(INT16U data)
     TFT_CS_LOW;
     //SPI.transfer(data>>8);
     //SPI.transfer(data&0xff);
-    spi_transmit16(data);
+    //spi_transmit(data>>8);
+    //spi_transmit(data&0xff);
+    spi_transmit16_msb(data);
     TFT_CS_HIGH;
     
 }
@@ -212,12 +212,16 @@ void TFT::fillScreen(INT16 XL, INT16 XR, INT16 YU, INT16 YD)
       XL=XR;
       while(XL--) {
         if(_flags&LCD_BG) {
-          SPI.transfer(_bgColorH);
-          SPI.transfer(_bgColorL);
+          //SPI.transfer(_bgColorH);
+          //SPI.transfer(_bgColorL);
+          spi_transmit(_bgColorH);
+          spi_transmit(_bgColorL);
         }
         else {
-          SPI.transfer(_fgColorH);
-          SPI.transfer(_fgColorL);
+          //SPI.transfer(_fgColorH);
+          //SPI.transfer(_fgColorL);
+          spi_transmit(_fgColorH);
+          spi_transmit(_fgColorL);
         }
       }
     }
@@ -268,8 +272,10 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
               TFT_CS_LOW;
               nb=(_size_mask_thick+1)*(_size_mask_thick+1);
               while(nb--) {
-                SPI.transfer(_fgColorH);
-                SPI.transfer(_fgColorL);
+                //SPI.transfer(_fgColorH);
+                //SPI.transfer(_fgColorL);
+                spi_transmit(_fgColorH);
+                spi_transmit(_fgColorL);
               }     
             }
         }

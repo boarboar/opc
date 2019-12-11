@@ -238,7 +238,7 @@ protected:
         INT8U _flags;	
         INT8U _size_mask_thick;
         INT8U _fgColorL, _fgColorH, _bgColorL, _bgColorH;
-        
+        //INT16U _fgColor, _bgColor;
 };
 
 #endif
