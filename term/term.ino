@@ -89,6 +89,9 @@ uint32_t t;
 #define EMIT(K) { Serial.print((K)); if(flags&F_SER_ECHO_ON) term.printc((K)); }  
 #define PRINT_ECHO_STATUS() {term.println((flags&F_SER_ECHO_ON) ? "[ECHO ON]" : "[ECHO OFF]");}
 
+#define CODE_XOFF  '\x13'
+#define CODE_XON   '\x11' 
+
 void setup() {                
   // initialize the digital pin as an output.
   digitalWrite(KB_LED, LOW); 
@@ -101,6 +104,7 @@ void setup() {
   
   digitalWrite(KB_LED, HIGH);
   Serial.begin(9600);  
+  Serial.print(CODE_XOFF);
   term.init();  
   delay(10);
   while(Serial.available()>0) Serial.read(); // clear input
@@ -110,6 +114,7 @@ void setup() {
   
   digitalWrite(KB_LED, LOW);
   t=millis();
+  Serial.print(CODE_XON);
 }
 
 void loop() {
@@ -120,6 +125,7 @@ void loop() {
       byte b = Serial.read(); 
       term.printc((char)b, false);
       //Serial.print((char)b);
+      // if(cc>16) Serial.print(CODE_XOFF); // try this
     }
     term.showCursor();
   }
@@ -128,6 +134,7 @@ void loop() {
     return;
   }
   if(millis()>=t+SCAN_DELAY) {
+    Serial.print(CODE_XOFF);
     key_loop();
     t=millis();
     if(++cursor_cnt>=CURSOR_COUNT) {
@@ -135,6 +142,7 @@ void loop() {
       term.cursorBlink();
     }
   }
+  Serial.print(CODE_XON);
 }
 
 inline void key_loop() {

@@ -271,17 +271,34 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
               TFT_DC_HIGH;
               TFT_CS_LOW;
               nb=(_size_mask_thick+1)*(_size_mask_thick+1);
+              /*
               while(nb--) {
-                //SPI.transfer(_fgColorH);
-                //SPI.transfer(_fgColorL);
+                SPI.transfer(_fgColorH);
+                SPI.transfer(_fgColorL);
+              }
+              */
+              /*
+              while(nb--) {
                 spi_transmit(_fgColorH);
                 spi_transmit(_fgColorL);
-              }     
+              }
+                */                
+              while(nb--) {
+                while (!(UCB0IFG & UCTXIFG));
+                UCB0TXBUF = _fgColorH;	/* Wait for previous tx to complete. */
+  	        while (!(UCB0IFG & UCTXIFG));
+	        /* Setting TXBUF clears the TXIFG flag. */	
+                UCB0TXBUF = _fgColorL;    	        
+              } 
+              while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+  	      // clear RXIFG flag
+	      UCB0IFG &= ~UCRXIFG;
             }
         }
     }
     //setFillColor(LCD_BG);
 }
+
 /*
 void TFT::drawChar( INT8U ascii, INT16U poX, INT16U poY)
 {   
