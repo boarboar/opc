@@ -135,18 +135,6 @@ void TFT::TFTinit (/*INT8U cs, INT8U dc*/)
     SPI.begin();
     SPI.setClockDivider(SPI_CLOCK_DIV2);
 	
-	// ??? try to comment
-/*
-    TFT_CS_HIGH;
-    TFT_DC_HIGH;    
-    delay(500);
-	
-    sendCMD(0x01); // SW reset
-    delay(200); 
- */   
-    // ???
-	// 
-    //sendCMD(0x01); // SW reset
     delay(5);
 	
     WriteCmdSeq(seq);
@@ -208,6 +196,7 @@ void TFT::fillScreen(INT16 XL, INT16 XR, INT16 YU, INT16 YD)
     TFT_DC_HIGH;
     TFT_CS_LOW;
     
+    /*
     while(YD--) {
       XL=XR;
       while(XL--) {
@@ -225,6 +214,34 @@ void TFT::fillScreen(INT16 XL, INT16 XR, INT16 YU, INT16 YD)
         }
       }
     }
+    */
+    
+    if(_flags&LCD_BG) {
+      while(YD--) {
+        XL=XR;
+        while(XL--) {
+          while (!(UCB0IFG & UCTXIFG));
+          UCB0TXBUF = _bgColorH;	/* Wait for previous tx to complete. */
+  	  while (!(UCB0IFG & UCTXIFG));
+	  /* Setting TXBUF clears the TXIFG flag. */	
+          UCB0TXBUF = _bgColorL;   
+        }
+      }      
+    } else {
+      while(YD--) {
+        XL=XR;
+        while(XL--) {
+          while (!(UCB0IFG & UCTXIFG));
+          UCB0TXBUF = _fgColorH;	/* Wait for previous tx to complete. */
+  	  while (!(UCB0IFG & UCTXIFG));
+	  /* Setting TXBUF clears the TXIFG flag. */	
+          UCB0TXBUF = _fgColorL;           }
+      }
+    }
+   while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+   // clear RXIFG flag
+   UCB0IFG &= ~UCRXIFG;
+
 }
 
 // ##############################################################################################
