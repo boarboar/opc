@@ -20,8 +20,13 @@
 14. term print unknown chars as [HEX]
 
 
-~[0;32m
+~[0;32mI (434)
 
 ~[K
 
 ESC-LEFT emits backspace
+
+Backsp means left not erase but moves a cursor
+^K erases to eol
+
+insert inside line assumes moving to right

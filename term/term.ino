@@ -95,6 +95,10 @@ uint32_t t;
 #define CODE_XOFF  '\x13'
 #define CODE_XON   '\x11' 
 
+#define EMIT_XON() {if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XON);}
+#define EMIT_XOFF() {if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XOFF);}
+
+
 void setup() {                
   // initialize the digital pin as an output.
   digitalWrite(KB_LED, LOW); 
@@ -107,7 +111,7 @@ void setup() {
   
   digitalWrite(KB_LED, HIGH);
   Serial.begin(9600);  
-  Serial.print(CODE_XOFF);
+  EMIT_XOFF();
   term.init();  
   delay(10);
   while(Serial.available()>0) Serial.read(); // clear input
@@ -118,7 +122,7 @@ void setup() {
   
   digitalWrite(KB_LED, LOW);
   t=millis();
-  if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XON);
+  EMIT_XON();
 }
 
 void loop() {
@@ -126,8 +130,10 @@ void loop() {
     uint16_t cc=0;  
     term.hideCursor();
     while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
+      EMIT_XOFF();
       byte b = Serial.read(); 
       term.printc((char)b, false);
+      EMIT_XON();
       //Serial.print((char)b);
       // if(cc>16) Serial.print(CODE_XOFF); // try this
     }
@@ -138,14 +144,14 @@ void loop() {
     return;
   }
   if(millis()>=t+SCAN_DELAY) {
-    if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XOFF);
+    EMIT_XOFF();
     key_loop();
     t=millis();
     if(++cursor_cnt>=CURSOR_COUNT) {
       cursor_cnt=0;
       term.cursorBlink();
     }
-    if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XON);
+    EMIT_XON();
   }
   
 }
