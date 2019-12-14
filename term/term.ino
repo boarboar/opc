@@ -40,6 +40,7 @@ uint8_t  key_in[KEY_COUNT_BYTES] = {0};
 #define KEY_ESC_FIRST   0xfa
 #define KEY_SERIAL_SPEED   0xf9
 #define KEY_SERIAL_ECHO    0xf8
+#define KEY_SERIAL_XCTRL   0xf7
 #define KEY_CTRL_C  0x3
 #define KEY_CTRL_D  0x4
 #define KEY_ESC     0x1b
@@ -63,7 +64,7 @@ uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 {KEY_ESC,  KEY_CTRL_C, KEY_CTRL_D, 0, 0, KEY_ESC_L, KEY_ESC_U, KEY_ESC_D, KEY_ESC_R, '\b'},  //  l, u, d, r, bsp
 {'\t', '~', 0, 0, '-', '_', '=', '+', '\\', '|'},
-{0, 0, ';', ':', '"', '\'', '[', '{', ']', '}'},
+{0, KEY_SERIAL_XCTRL, ';', ':', '"', '\'', '[', '{', ']', '}'},
 {0,0,KEY_SERIAL_SPEED, KEY_SERIAL_ECHO,',','<', '.', '>', '/', '?'}
 };
 
@@ -74,6 +75,7 @@ const char *serial_rates_descr[]={"[9600]", "[19200]", "[38400]", "[57600]", "[1
 #define F_SHIFT_PRES  0x01
 #define F_FN_PRES     0x02
 #define F_SER_ECHO_ON  0x10
+#define F_SER_XCTRL_ON  0x20
 
 uint8_t cursor_cnt=0;
 uint8_t flags=F_SER_ECHO_ON;
@@ -88,6 +90,7 @@ uint32_t t;
 
 #define EMIT(K) { Serial.print((K)); if(flags&F_SER_ECHO_ON) term.printc((K)); }  
 #define PRINT_ECHO_STATUS() {term.println((flags&F_SER_ECHO_ON) ? "[ECHO ON]" : "[ECHO OFF]");}
+#define PRINT_XCTRL_STATUS() {term.println((flags&F_SER_XCTRL_ON) ? "[XONOFF ON]" : "[XONOFF OFF]");}
 
 #define CODE_XOFF  '\x13'
 #define CODE_XON   '\x11' 
@@ -111,10 +114,11 @@ void setup() {
   term.prints("TERM v1.01 "); 
   term.prints(serial_rates_descr[serial_rate_idx]);
   PRINT_ECHO_STATUS();
+  PRINT_XCTRL_STATUS();
   
   digitalWrite(KB_LED, LOW);
   t=millis();
-  Serial.print(CODE_XON);
+  if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XON);
 }
 
 void loop() {
@@ -134,15 +138,16 @@ void loop() {
     return;
   }
   if(millis()>=t+SCAN_DELAY) {
-    Serial.print(CODE_XOFF);
+    if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XOFF);
     key_loop();
     t=millis();
     if(++cursor_cnt>=CURSOR_COUNT) {
       cursor_cnt=0;
       term.cursorBlink();
     }
+    if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XON);
   }
-  Serial.print(CODE_XON);
+  
 }
 
 inline void key_loop() {
@@ -185,12 +190,18 @@ inline void key_loop() {
                 } else if((uint8_t)key==KEY_SERIAL_ECHO) {
                   if(flags&F_SER_ECHO_ON) {
                     flags&=~F_SER_ECHO_ON;
-                    //term.println("[ECHO OFF]");
                   } else {
                     flags|=F_SER_ECHO_ON;
-                    //term.println("[ECHO ON]");
                   }
                   PRINT_ECHO_STATUS();
+                  key=0;
+                } else if((uint8_t)key==KEY_SERIAL_XCTRL) {
+                  if(flags&F_SER_XCTRL_ON) {
+                    flags&=~F_SER_XCTRL_ON;
+                  } else {
+                    flags|=F_SER_XCTRL_ON;
+                  }
+                  PRINT_XCTRL_STATUS();
                   key=0;
                 }
                 if(key) {

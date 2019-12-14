@@ -105,9 +105,9 @@ inline static void sendData(INT16U data)
     TFT_CS_LOW;
     //SPI.transfer(data>>8);
     //SPI.transfer(data&0xff);
-    //spi_transmit(data>>8);
-    //spi_transmit(data&0xff);
-    spi_transmit16_msb(data);
+    spi_transmit(data>>8);
+    spi_transmit(data&0xff);
+    //spi_transmit16_msb(data);
     TFT_CS_HIGH;
     
 }
@@ -196,51 +196,68 @@ void TFT::fillScreen(INT16 XL, INT16 XR, INT16 YU, INT16 YD)
     TFT_DC_HIGH;
     TFT_CS_LOW;
     
-    /*
-    while(YD--) {
-      XL=XR;
-      while(XL--) {
-        if(_flags&LCD_BG) {
-          //SPI.transfer(_bgColorH);
-          //SPI.transfer(_bgColorL);
-          spi_transmit(_bgColorH);
-          spi_transmit(_bgColorL);
-        }
-        else {
-          //SPI.transfer(_fgColorH);
-          //SPI.transfer(_fgColorL);
-          spi_transmit(_fgColorH);
-          spi_transmit(_fgColorL);
-        }
-      }
-    }
-    */
     
+//    while(YD--) {
+//      XL=XR;
+//      while(XL--) {
+//        if(_flags&LCD_BG) {
+//          //SPI.transfer(_bgColorH);
+//          //SPI.transfer(_bgColorL);
+//          spi_transmit(_bgColorH);
+//          spi_transmit(_bgColorL);
+//        }
+//        else {
+//          //SPI.transfer(_fgColorH);
+//          //SPI.transfer(_fgColorL);
+//          spi_transmit(_fgColorH);
+//          spi_transmit(_fgColorL);
+//        }
+//      }
+//    }
+//    
     if(_flags&LCD_BG) {
       while(YD--) {
         XL=XR;
         while(XL--) {
-          while (!(UCB0IFG & UCTXIFG));
-          UCB0TXBUF = _bgColorH;	/* Wait for previous tx to complete. */
-  	  while (!(UCB0IFG & UCTXIFG));
-	  /* Setting TXBUF clears the TXIFG flag. */	
-          UCB0TXBUF = _bgColorL;   
+          spi_transmit(_bgColorH);
+          spi_transmit(_bgColorL);
         }
       }      
     } else {
       while(YD--) {
         XL=XR;
         while(XL--) {
-          while (!(UCB0IFG & UCTXIFG));
-          UCB0TXBUF = _fgColorH;	/* Wait for previous tx to complete. */
-  	  while (!(UCB0IFG & UCTXIFG));
-	  /* Setting TXBUF clears the TXIFG flag. */	
-          UCB0TXBUF = _fgColorL;           }
+          spi_transmit(_fgColorH);
+          spi_transmit(_fgColorL);          
+          }
       }
     }
-   while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
-   // clear RXIFG flag
-   UCB0IFG &= ~UCRXIFG;
+
+//    if(_flags&LCD_BG) {
+//      while(YD--) {
+//        XL=XR;
+//        while(XL--) {
+//          while (!(UCB0IFG & UCTXIFG));
+//          UCB0TXBUF = _bgColorH;	/* Wait for previous tx to complete. */
+//  	  while (!(UCB0IFG & UCTXIFG));
+//	  /* Setting TXBUF clears the TXIFG flag. */	
+//          UCB0TXBUF = _bgColorL;   
+//        }
+//      }      
+//    } else {
+//      while(YD--) {
+//        XL=XR;
+//        while(XL--) {
+//          while (!(UCB0IFG & UCTXIFG));
+//          UCB0TXBUF = _fgColorH;	/* Wait for previous tx to complete. */
+//  	  while (!(UCB0IFG & UCTXIFG));
+//	  /* Setting TXBUF clears the TXIFG flag. */	
+//          UCB0TXBUF = _fgColorL;           }
+//      }
+//    }
+//   while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+//   // clear RXIFG flag
+//   UCB0IFG &= ~UCRXIFG;
 
 }
 
@@ -294,22 +311,22 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
                 SPI.transfer(_fgColorL);
               }
               */
-              /*
+              
               while(nb--) {
                 spi_transmit(_fgColorH);
                 spi_transmit(_fgColorL);
               }
-                */                
-              while(nb--) {
-                while (!(UCB0IFG & UCTXIFG));
-                UCB0TXBUF = _fgColorH;	/* Wait for previous tx to complete. */
-  	        while (!(UCB0IFG & UCTXIFG));
-	        /* Setting TXBUF clears the TXIFG flag. */	
-                UCB0TXBUF = _fgColorL;    	        
-              } 
-              while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
-  	      // clear RXIFG flag
-	      UCB0IFG &= ~UCRXIFG;
+                                
+//              while(nb--) {
+//                while (!(UCB0IFG & UCTXIFG));
+//                UCB0TXBUF = _fgColorH;	/* Wait for previous tx to complete. */
+//  	        while (!(UCB0IFG & UCTXIFG));
+//	        /* Setting TXBUF clears the TXIFG flag. */	
+//                UCB0TXBUF = _fgColorL;    	        
+//              } 
+//              while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+//  	      // clear RXIFG flag
+//	      UCB0IFG &= ~UCRXIFG;
             }
         }
     }
