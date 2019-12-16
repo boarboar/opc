@@ -45,21 +45,26 @@ void LCDTerminal::printc(char c, bool cctrl) {
   if(_esc_state>ESC_STATE_0) { // handle ESQ seqs
     switch(_esc_state) {
       case ESC_STATE_ESC:
-        if(c=='[') c = '^'; // to be continued
-        _esc_state = ESC_STATE_BR;
+        //if(c=='[') c = '^'; // to be continued
+        if(c=='[') { 
+          _esc_state = ESC_STATE_BR;
+          c=0;
+        } else _esc_state = ESC_STATE_0;
         break;
       case ESC_STATE_BR:
         switch(c) {
           case 'K' : // fill until EOL
             //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
             Tft.setFillColor(LCD_BG);
-            Tft.fillScreen((INT16U)(_x_pos-1)*WS_CHAR_S_X, (INT16U)(_x_eol_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
+            Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X, (INT16U)(_x_eol_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
             c=0;
           default: _esc_state = ESC_STATE_0;
         }  
       default: _esc_state = ESC_STATE_0;
     }  
   }
+  
+  if(c==0) return;
   
   if(cctrl) hideCursor();
   switch(c) {

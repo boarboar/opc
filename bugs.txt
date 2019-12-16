@@ -7,12 +7,12 @@
 13. check if we can optimize low level grph: send two int16 in one set; shouln't wee TFT_CS_HI after transfer? Check other implementations
    - test impl with direct usci registers interaction; if OK - rewrite fill and drawchar - test drawchar - OK - test fill ? - partially
 9. try XON/XOFF - test - useless
-10. backsp command = cursor left. ESC-K erases line. - test -   
+10. backsp command = cursor left. ESC-K erases line. - test - fixwed - OK  
 
    
 3. last line len - use for scroll last line clr || TEST - fail - rewrite    
 5. save settings in eprom
-6. \b results in 123->12~[K - first back is our back, then probably ESC [ K 
+
 7. esc r ?{3    esc d ?[
 8. escp u:   123\n456 -> 14123
 //9. test serial flow control: rise host CTS when ready, low when full  (D19 pin for ESP32)
@@ -24,9 +24,6 @@
 
 ~[K
 
-ESC-LEFT emits backspace
+ESC[nD - should support this (LEFT N CHARS) - this happen when cursor up (hist retrieve)
 
-Backsp means left not erase but moves a cursor
-^K erases to eol
-
-insert inside line assumes moving to right
+insert inside line assumes moving the tail to right (!!!) --  or try to erase EOL (!)
