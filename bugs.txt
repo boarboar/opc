@@ -5,9 +5,9 @@
 4. show serial settings on startup || to test - OK - wrong echo status - fixed || ok
 15. display ESC as ~ (for tests) - OK 
 13. check if we can optimize low level grph: send two int16 in one set; shouln't wee TFT_CS_HI after transfer? Check other implementations
-   - test impl with direct usci registers interaction; if OK - rewrite fill and drawchar - test drawchar - OK - test fill ?
-9. try XON/XOFF - test
-   
+   - test impl with direct usci registers interaction; if OK - rewrite fill and drawchar - test drawchar - OK - test fill ? - partially
+9. try XON/XOFF - test - useless
+10. backsp command = cursor left. ESC-K erases line. - test -   
 
    
 3. last line len - use for scroll last line clr || TEST - fail - rewrite    
@@ -20,7 +20,7 @@
 14. term print unknown chars as [HEX]
 
 
-~[0;32mI (434)
+~[0;32m
 
 ~[K
 

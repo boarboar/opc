@@ -34,7 +34,7 @@
 
 #define ESC_STATE_0   1
 #define ESC_STATE_ESC 2
-#define ESC_STATE_CMD 3
+#define ESC_STATE_BR  3
 
 class LCDTerminal {
 public:
@@ -54,7 +54,8 @@ public:
 protected:  
   TFT Tft;
   uint8_t _y_pos; 
-  uint8_t _x_pos;  
+  uint8_t _x_pos;  // cursor pos
+  uint8_t _x_eol_pos;  
   uint8_t _y_scroll;  
   uint8_t _yeff;
   uint8_t _flags;

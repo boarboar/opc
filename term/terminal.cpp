@@ -2,7 +2,8 @@
 #include "terminal.h"
 
 void LCDTerminal::init() {
-  _x_pos = _y_pos = 0;
+  _y_pos = _yeff = 0;
+  _x_pos = _x_eol_pos = 0;
   _y_scroll = 0;
   _flags = 0;
   _prev_chr = 0;
@@ -45,8 +46,18 @@ void LCDTerminal::printc(char c, bool cctrl) {
     switch(_esc_state) {
       case ESC_STATE_ESC:
         if(c=='[') c = '^'; // to be continued
-        _esc_state = 0;
-      default: _esc_state = 0;
+        _esc_state = ESC_STATE_BR;
+        break;
+      case ESC_STATE_BR:
+        switch(c) {
+          case 'K' : // fill until EOL
+            //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
+            Tft.setFillColor(LCD_BG);
+            Tft.fillScreen((INT16U)(_x_pos-1)*WS_CHAR_S_X, (INT16U)(_x_eol_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
+            c=0;
+          default: _esc_state = ESC_STATE_0;
+        }  
+      default: _esc_state = ESC_STATE_0;
     }  
   }
   
@@ -59,26 +70,26 @@ void LCDTerminal::printc(char c, bool cctrl) {
       break;
     case '\t' :  
       _x_pos+=WS_TAB_IDENT;
-      if(_x_pos >= WS_CHAR_N_X) advance_y();
+      _x_eol_pos+=WS_TAB_IDENT;
+      if(_x_eol_pos >= WS_CHAR_N_X) advance_y();
       break;
     case '\b' :
       if(_x_pos > 0) {
-        _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
-        Tft.setFillColor(LCD_BG);
-        Tft.fillScreen((INT16U)(_x_pos-1)*WS_CHAR_S_X, (INT16U)(_x_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
+        //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
+        //Tft.setFillColor(LCD_BG);
+        //Tft.fillScreen((INT16U)(_x_pos-1)*WS_CHAR_S_X, (INT16U)(_x_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
         _x_pos--;
       }
       break;
     case ESC_CHAR :
-      //c =  '~';  // ESC
       _esc_state=ESC_STATE_ESC;
       break;
-    //case '[':
-    //  if(_prev_chr==ESC_CHAR) c = '^';  
     default:
-      _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1;
+      //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1;
       Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_yeff*WS_CHAR_S_Y);
-      if(++_x_pos >= WS_CHAR_N_X) advance_y();
+      ++_x_pos;
+      ++_x_eol_pos;
+      if(_x_eol_pos >= WS_CHAR_N_X) advance_y();
   }
   _prev_chr=c;
   if(cctrl) showCursor();
@@ -86,11 +97,13 @@ void LCDTerminal::printc(char c, bool cctrl) {
 
 void LCDTerminal::advance_y() {
   if(++_y_pos>=WS_CHAR_N_Y) {
-    _y_pos=WS_CHAR_N_Y;
-    if(_x_pos>=WS_CHAR_N_X) _x_pos = WS_CHAR_N_X-1;
+    _y_pos=WS_CHAR_N_Y;    
+    //if(_x_pos>=WS_CHAR_N_X) _x_pos = WS_CHAR_N_X-1;
     scroll();
   }
+  _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1;
   _x_pos = 0;
+  _x_eol_pos = 0;
 }
   
 void LCDTerminal::scroll() {
@@ -107,7 +120,7 @@ void LCDTerminal::showCursor() {
  if(_flags&WS_F_CUR_ON && !(_flags&WS_F_CUR_VIS)) 
   {
     //Serial.println("ON");
-    _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
+    //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
     Tft.setFillColor(LCD_FG);
     Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X+2, (INT16U)(_x_pos+1)*WS_CHAR_S_X-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2);
     _flags |= WS_F_CUR_VIS;
@@ -118,7 +131,7 @@ void LCDTerminal::hideCursor() {
   if( _flags&WS_F_CUR_ON && _flags&WS_F_CUR_VIS) 
   {
     //Serial.println("OFF");
-    _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
+    //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
     Tft.setFillColor(LCD_BG);
     Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X+2, (INT16U)(_x_pos+1)*WS_CHAR_S_X-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-1);
     _flags &= ~WS_F_CUR_VIS;
