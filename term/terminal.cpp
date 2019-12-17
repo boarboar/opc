@@ -8,11 +8,11 @@ void LCDTerminal::init() {
   _flags = 0;
   _prev_chr = 0;
   _esc_state = ESC_STATE_0;
+  _esc_val = 0;
   Tft.TFTinit();
   Tft.setOrientation(WS_ORIENT);  
   lcd_defaults();
   showCursor();
-  //line_print("WELCOME"); 
 }
 
 void LCDTerminal::lcd_defaults() {
@@ -45,19 +45,33 @@ void LCDTerminal::printc(char c, bool cctrl) {
   if(_esc_state>ESC_STATE_0) { // handle ESQ seqs
     switch(_esc_state) {
       case ESC_STATE_ESC:
-        //if(c=='[') c = '^'; // to be continued
         if(c=='[') { 
           _esc_state = ESC_STATE_BR;
+          _esc_val = 0;
           c=0;
         } else _esc_state = ESC_STATE_0;
         break;
       case ESC_STATE_BR:
-        switch(c) {
+        if(isdigit(c)) {
+          _esc_val = _esc_val*10+(c-'0');
+        }
+        else switch(c) {
           case 'K' : // fill until EOL
-            //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
+          /*
             Tft.setFillColor(LCD_BG);
             Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X, (INT16U)(_x_eol_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
+            */
+            eraseEOL();
             c=0;
+            _esc_state = ESC_STATE_0;
+            break;
+          case 'D' : 
+            c=0;  
+            if(_esc_val == 0) _esc_val = 1;
+            if(_esc_val > _x_pos) _esc_val = _x_pos;
+            _x_pos -= _esc_val;
+            _esc_state = ESC_STATE_0;
+            break;
           default: _esc_state = ESC_STATE_0;
         }  
       default: _esc_state = ESC_STATE_0;
@@ -79,18 +93,13 @@ void LCDTerminal::printc(char c, bool cctrl) {
       if(_x_eol_pos >= WS_CHAR_N_X) advance_y();
       break;
     case '\b' :
-      if(_x_pos > 0) {
-        //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
-        //Tft.setFillColor(LCD_BG);
-        //Tft.fillScreen((INT16U)(_x_pos-1)*WS_CHAR_S_X, (INT16U)(_x_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
-        _x_pos--;
-      }
+      if(_x_pos > 0) _x_pos--;     
       break;
     case ESC_CHAR :
       _esc_state=ESC_STATE_ESC;
       break;
     default:
-      //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1;
+      if(_x_pos<_x_eol_pos) eraseEOL();
       Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_yeff*WS_CHAR_S_Y);
       ++_x_pos;
       ++_x_eol_pos;
@@ -103,7 +112,6 @@ void LCDTerminal::printc(char c, bool cctrl) {
 void LCDTerminal::advance_y() {
   if(++_y_pos>=WS_CHAR_N_Y) {
     _y_pos=WS_CHAR_N_Y;    
-    //if(_x_pos>=WS_CHAR_N_X) _x_pos = WS_CHAR_N_X-1;
     scroll();
   }
   _yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1;
@@ -124,8 +132,6 @@ void LCDTerminal::scroll() {
 void LCDTerminal::showCursor() {
  if(_flags&WS_F_CUR_ON && !(_flags&WS_F_CUR_VIS)) 
   {
-    //Serial.println("ON");
-    //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
     Tft.setFillColor(LCD_FG);
     Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X+2, (INT16U)(_x_pos+1)*WS_CHAR_S_X-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2);
     _flags |= WS_F_CUR_VIS;
@@ -135,8 +141,6 @@ void LCDTerminal::showCursor() {
 void LCDTerminal::hideCursor() {
   if( _flags&WS_F_CUR_ON && _flags&WS_F_CUR_VIS) 
   {
-    //Serial.println("OFF");
-    //_yeff = _y_pos<WS_CHAR_N_Y ? _y_pos : _y_scroll-1; 
     Tft.setFillColor(LCD_BG);
     Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X+2, (INT16U)(_x_pos+1)*WS_CHAR_S_X-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-1);
     _flags &= ~WS_F_CUR_VIS;

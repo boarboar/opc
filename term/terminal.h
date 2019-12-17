@@ -51,6 +51,8 @@ public:
   void hideCursor();
   inline void setDataColor() {Tft.setFgColor(WS_FG_COLOR);}
   inline void setCtrlColor() {Tft.setFgColor(WS_FG_COLOR_CTRL);}
+  inline void eraseEOL() {Tft.setFillColor(LCD_BG);
+            Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X, (INT16U)(_x_eol_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);}
 protected:  
   TFT Tft;
   uint8_t _y_pos; 
@@ -61,6 +63,7 @@ protected:
   uint8_t _flags;
   char  _prev_chr;  
   uint8_t _esc_state;
+  uint8_t _esc_val; // should be an array
   void advance_y();
 
 };

@@ -8,7 +8,9 @@
    - test impl with direct usci registers interaction; if OK - rewrite fill and drawchar - test drawchar - OK - test fill ? - partially
 9. try XON/XOFF - test - useless
 10. backsp command = cursor left. ESC-K erases line. - test - fixwed - OK  
-
+11 insert inside line - try to erase EOL  - to test
+12 ESC[nD - should support this (LEFT N CHARS) - this happen when cursor up (hist retrieve) - to test
+13 HW serial custom buffers - to test 
    
 3. last line len - use for scroll last line clr || TEST - fail - rewrite    
 5. save settings in eprom
@@ -16,7 +18,7 @@
 7. esc r ?{3    esc d ?[
 8. escp u:   123\n456 -> 14123
 //9. test serial flow control: rise host CTS when ready, low when full  (D19 pin for ESP32)
-12. font sz 1 test
+//12. font sz 1 test - unreadable
 14. term print unknown chars as [HEX]
 
 
@@ -24,6 +26,5 @@
 
 ~[K
 
-ESC[nD - should support this (LEFT N CHARS) - this happen when cursor up (hist retrieve)
 
 insert inside line assumes moving the tail to right (!!!) --  or try to erase EOL (!)
