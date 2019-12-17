@@ -54,6 +54,8 @@ void LCDTerminal::printc(char c, bool cctrl) {
       case ESC_STATE_BR:
         if(isdigit(c)) {
           _esc_val = _esc_val*10+(c-'0');
+          c=0;
+          break;
         }
         else switch(c) {
           case 'K' : // fill until EOL
