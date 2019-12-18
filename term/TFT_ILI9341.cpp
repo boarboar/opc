@@ -284,8 +284,6 @@ void TFT::scrollAddress(INT16U vsp) {
 
 void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
 {   
-    //if(_flags&LCD_OPAQ) { setFillColor(LCD_BG); fillScreen(poX, poX+FONT_SPACE*_size_mask_thick, poY, poY+FONT_Y*_size_mask_thick); }	
-    //setFillColor(LCD_FG);
     if((ascii<32)||(ascii>129)) ascii = '?';
     INT16U y;
     INT8U i, temp;
@@ -330,7 +328,6 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
             }
         }
     }
-    //setFillColor(LCD_BG);
 }
 
 /*

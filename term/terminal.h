@@ -35,6 +35,8 @@
 #define ESC_STATE_0   1
 #define ESC_STATE_ESC 2
 #define ESC_STATE_BR  3
+#define ESC_STATE_V0  4
+#define ESC_STATE_V1  5
 
 class LCDTerminal {
 public:
@@ -63,8 +65,9 @@ protected:
   uint8_t _flags;
   char  _prev_chr;  
   uint8_t _esc_state;
-  uint8_t _esc_val; // should be an array
+  uint8_t _esc_val[2];
   void advance_y();
+  char esc_cmd(char c);
 
 };
 

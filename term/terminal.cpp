@@ -8,7 +8,7 @@ void LCDTerminal::init() {
   _flags = 0;
   _prev_chr = 0;
   _esc_state = ESC_STATE_0;
-  _esc_val = 0;
+  _esc_val[0] = _esc_val[1] = 0;
   Tft.TFTinit();
   Tft.setOrientation(WS_ORIENT);  
   lcd_defaults();
@@ -39,7 +39,28 @@ void LCDTerminal::prints(const char *s) {
     cursorOn();
   }
 }
-  
+
+char LCDTerminal::esc_cmd(char c) {
+  switch(c) {
+     case 'K' : // fill until EOL
+        c=0;  
+        eraseEOL();        
+        break;
+     case 'D' :         
+        if(_esc_val[0] == 0) _esc_val[0] = 1;
+        if(_esc_val[0] > _x_pos) _esc_val[0] = _x_pos;
+        _x_pos -= _esc_val[0];           
+        break;
+     case 'm' :    
+        c=0; 
+        // color scheme
+        break;
+     default: ;
+  }
+  _esc_state = ESC_STATE_0;
+  return c;
+}
+
 void LCDTerminal::printc(char c, bool cctrl) {  
   
   if(_esc_state>ESC_STATE_0) { // handle ESQ seqs
@@ -47,35 +68,37 @@ void LCDTerminal::printc(char c, bool cctrl) {
       case ESC_STATE_ESC:
         if(c=='[') { 
           _esc_state = ESC_STATE_BR;
-          _esc_val = 0;
+          _esc_val[0] = _esc_val[1] = 0;
           c=0;
         } else _esc_state = ESC_STATE_0;
         break;
       case ESC_STATE_BR:
         if(isdigit(c)) {
-          _esc_val = _esc_val*10+(c-'0');
+          _esc_state = ESC_STATE_V0;
+          _esc_val[0] = (c-'0');
           c=0;
           break;
         }
-        else switch(c) {
-          case 'K' : // fill until EOL
-          /*
-            Tft.setFillColor(LCD_BG);
-            Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X, (INT16U)(_x_eol_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);
-            */
-            eraseEOL();
-            c=0;
-            _esc_state = ESC_STATE_0;
-            break;
-          case 'D' : 
-            c=0;  
-            if(_esc_val == 0) _esc_val = 1;
-            if(_esc_val > _x_pos) _esc_val = _x_pos;
-            _x_pos -= _esc_val;
-            _esc_state = ESC_STATE_0;
-            break;
-          default: _esc_state = ESC_STATE_0;
-        }  
+        else c=esc_cmd(c);
+        break;  
+      case ESC_STATE_V0:
+        if(isdigit(c)) {          
+          _esc_val[0] = _esc_val[0]*10+(c-'0');
+          c=0;
+          break;
+        } else if(c==';') {
+          _esc_state = ESC_STATE_V1;
+          c=0;
+          break;
+        } else c=esc_cmd(c);
+        break;    
+      case ESC_STATE_V1:
+        if(isdigit(c)) {          
+          _esc_val[1] = _esc_val[1]*10+(c-'0');
+          c=0;
+          break;
+        } else c=esc_cmd(c);
+        break;      
       default: _esc_state = ESC_STATE_0;
     }  
   }

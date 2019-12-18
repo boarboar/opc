@@ -10,7 +10,8 @@
 10. backsp command = cursor left. ESC-K erases line. - test - fixwed - OK  
 11 insert inside line - try to erase EOL  - to test
 12 ESC[nD - should support this (LEFT N CHARS) - this happen when cursor up (hist retrieve) - to test
-13 HW serial custom buffers - to test 
+13 HW serial custom buffers - to test  - OK
+14 - retest ESC (multivalues support )
    
 3. last line len - use for scroll last line clr || TEST - fail - rewrite    
 5. save settings in eprom

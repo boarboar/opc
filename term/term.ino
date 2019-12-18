@@ -46,7 +46,7 @@ uint8_t  key_in[KEY_COUNT_BYTES] = {0};
 #define KEY_ESC     0x1b
 #define KEY_DEL     0x7f
 
-uint8_t keymap[ROW_COUNT][COL_COUNT] = {
+const uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
 {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
 {'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '\r'},
@@ -54,7 +54,7 @@ uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 };
 
 
-uint8_t keymap_shift[ROW_COUNT][COL_COUNT] = 
+const uint8_t keymap_shift[ROW_COUNT][COL_COUNT] = 
 {
 {'!','@','#','$','%','^','&','*','(',')'},
 {'Q','W','E','R','T','Y','U','I','O','P'},
@@ -62,7 +62,7 @@ uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 {0, 0, 'Z','X','C','V','B','N','M',' '}
 };
 
-uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
+const uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 {KEY_ESC,  KEY_CTRL_C, KEY_CTRL_D, 0, 0, KEY_ESC_L, KEY_ESC_U, KEY_ESC_D, KEY_ESC_R, '\b'},  //  l, u, d, r, bsp
 {'\t', '~', 0, 0, '-', '_', '=', '+', '\\', '|'},
 {KEY_DEL, KEY_SERIAL_XCTRL, ';', ':', '"', '\'', '[', '{', ']', '}'},
