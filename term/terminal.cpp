@@ -49,7 +49,8 @@ char LCDTerminal::esc_cmd(char c) {
      case 'D' :         
         if(_esc_val[0] == 0) _esc_val[0] = 1;
         if(_esc_val[0] > _x_pos) _esc_val[0] = _x_pos;
-        _x_pos -= _esc_val[0];           
+        _x_pos -= _esc_val[0];     
+        c=0;      
         break;
      case 'm' :    
         c=0; 
