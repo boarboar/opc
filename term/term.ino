@@ -130,15 +130,17 @@ void loop() {
   if(Serial.available()>0) {
     uint16_t cc=0;  
     term.hideCursor();
+    term.cursorCtrlOff();
     while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
       EMIT_XOFF();
-      byte b = Serial.read(); 
-      term.printc((char)b, false);
+      byte b = Serial.read();       
+      term.printc((char)b);
       EMIT_XON();
       //Serial.print((char)b);
       // if(cc>16) Serial.print(CODE_XOFF); // try this
     }
     term.showCursor();
+    term.cursorCtrlOn();
   }
   if(millis()<t) { // wraparound
     t=millis();

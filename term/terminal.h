@@ -26,9 +26,10 @@
 
 #define WS_TAB_IDENT  2
 
-#define WS_F_CUR_ON  0x01
-#define WS_F_CUR_VIS 0x02
-#define WS_F_CUR_SUPP 0x04
+#define WS_F_CUR_ON    0x01
+#define WS_F_CUR_VIS   0x02
+#define WS_F_CUR_SUPP   0x04
+#define WS_F_CUR_IGNORE 0x08
 
 #define ESC_CHAR '\x1b'
 
@@ -42,10 +43,12 @@ class LCDTerminal {
 public:
   void init();
   void lcd_defaults();
+  inline void cursorCtrlOff() {_flags |= WS_F_CUR_IGNORE;}
+  inline void cursorCtrlOn() {_flags &= ~WS_F_CUR_IGNORE;}
   inline void cursorOn() {_flags |= WS_F_CUR_ON; showCursor();}
   inline void cursorOff() {hideCursor(); _flags &= ~WS_F_CUR_ON;}
   inline void cursorBlink() {if(_flags & WS_F_CUR_VIS) hideCursor(); else showCursor();} 
-  void printc(char c, bool cctrl=true);
+  void printc(char c);
   void prints(const char *s);
   inline void println(const char *s) {prints(s); printc('\n');}
   void scroll();
@@ -53,8 +56,7 @@ public:
   void hideCursor();
   inline void setDataColor() {Tft.setFgColor(WS_FG_COLOR);}
   inline void setCtrlColor() {Tft.setFgColor(WS_FG_COLOR_CTRL);}
-  inline void eraseEOL() {Tft.setFillColor(LCD_BG);
-            Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X, (INT16U)(_x_eol_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);}
+  inline void eraseEOL() {Tft.setFillColor(LCD_BG); Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X, (INT16U)(_x_eol_pos)*WS_CHAR_S_X-1, (INT16U)(_yeff)*WS_CHAR_S_Y, (INT16U)(_yeff+1)*WS_CHAR_S_Y);}
 protected:  
   TFT Tft;
   uint8_t _y_pos; 
