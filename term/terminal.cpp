@@ -62,7 +62,7 @@ char LCDTerminal::esc_cmd(char c) {
   return c;
 }
 
-void LCDTerminal::printc(char c, bool cctrl) {  
+void LCDTerminal::printc(char c) {  
   
   if(_esc_state>ESC_STATE_0) { // handle ESQ seqs
     switch(_esc_state) {
@@ -106,7 +106,8 @@ void LCDTerminal::printc(char c, bool cctrl) {
   
   if(c==0) return;
   
-  if(cctrl) hideCursor();
+  //if(cctrl) hideCursor();
+  if(!_flags&WS_F_CUR_IGNORE) hideCursor();
   switch(c) {
     case '\n' : //lf
       if(_prev_chr=='\r') break;  // ignore CR LF
@@ -132,7 +133,8 @@ void LCDTerminal::printc(char c, bool cctrl) {
       if(_x_eol_pos >= WS_CHAR_N_X) advance_y();
   }
   _prev_chr=c;
-  if(cctrl) showCursor();
+  //if(cctrl) showCursor();
+  if(!_flags&WS_F_CUR_IGNORE) showCursor();
 }
 
 void LCDTerminal::advance_y() {
