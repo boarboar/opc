@@ -26,10 +26,10 @@
 
 #define WS_TAB_IDENT  2
 
-#define WS_F_CUR_ON    0x01
+//#define WS_F_CUR_ON    0x01
 #define WS_F_CUR_VIS   0x02
-#define WS_F_CUR_SUPP   0x04
-#define WS_F_CUR_IGNORE 0x08
+//#define WS_F_CUR_SUPP   0x04
+//#define WS_F_CUR_IGNORE 0x08
 
 #define ESC_CHAR '\x1b'
 
@@ -43,10 +43,10 @@ class LCDTerminal {
 public:
   void init();
   void lcd_defaults();
-  inline void cursorCtrlOff() {_flags |= WS_F_CUR_IGNORE;}
-  inline void cursorCtrlOn() {_flags &= ~WS_F_CUR_IGNORE;}
-  inline void cursorOn() {_flags |= WS_F_CUR_ON; showCursor();}
-  inline void cursorOff() {hideCursor(); _flags &= ~WS_F_CUR_ON;}
+//  inline void cursorCtrlOff() {_flags |= WS_F_CUR_IGNORE;}
+//  inline void cursorCtrlOn() {_flags &= ~WS_F_CUR_IGNORE;}
+//  inline void cursorOn() {_flags |= WS_F_CUR_ON; showCursor();}
+//  inline void cursorOff() {hideCursor(); _flags &= ~WS_F_CUR_ON;}
   inline void cursorBlink() {if(_flags & WS_F_CUR_VIS) hideCursor(); else showCursor();} 
   void printc(char c);
   void prints(const char *s);

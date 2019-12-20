@@ -22,22 +22,22 @@ void LCDTerminal::lcd_defaults() {
   Tft.setOpaq(LCD_TRANSP);
   Tft.setFillColor(LCD_BG);
   Tft.setupScrollArea(WS_SCREEN_SIZE_Y, 0, 0);
-  _flags |= WS_F_CUR_ON;
+  //_flags |= WS_F_CUR_ON;
 }
 
 void LCDTerminal::prints(const char *s) {
-  if(_flags & WS_F_CUR_ON) {
-    _flags |= WS_F_CUR_SUPP;
-    cursorOff();
-  }
+//  if(_flags & WS_F_CUR_ON) {
+//    _flags |= WS_F_CUR_SUPP;
+//    cursorOff();
+//  }
   setCtrlColor();
   const char *p = s;
   while(*p) printc(*p++);
   setDataColor();
-  if(_flags & WS_F_CUR_SUPP) {
-    _flags |= WS_F_CUR_ON;
-    cursorOn();
-  }
+//  if(_flags & WS_F_CUR_SUPP) {
+//    _flags |= WS_F_CUR_ON;
+//    cursorOn();
+//  }
 }
 
 char LCDTerminal::esc_cmd(char c) {
@@ -107,7 +107,7 @@ void LCDTerminal::printc(char c) {
   if(c==0) return;
   
   //if(cctrl) hideCursor();
-  if(!_flags&WS_F_CUR_IGNORE) hideCursor();
+  //if(!_flags&WS_F_CUR_IGNORE) hideCursor();
   switch(c) {
     case '\n' : //lf
       if(_prev_chr=='\r') break;  // ignore CR LF
@@ -134,7 +134,7 @@ void LCDTerminal::printc(char c) {
   }
   _prev_chr=c;
   //if(cctrl) showCursor();
-  if(!_flags&WS_F_CUR_IGNORE) showCursor();
+  //if(!_flags&WS_F_CUR_IGNORE) showCursor();
 }
 
 void LCDTerminal::advance_y() {
@@ -158,7 +158,8 @@ void LCDTerminal::scroll() {
 }
 
 void LCDTerminal::showCursor() {
- if(_flags&WS_F_CUR_ON && !(_flags&WS_F_CUR_VIS)) 
+ //if(_flags&WS_F_CUR_ON && !(_flags&WS_F_CUR_VIS)) 
+ if(!(_flags&WS_F_CUR_VIS)) 
   {
     Tft.setFillColor(LCD_FG);
     Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X+2, (INT16U)(_x_pos+1)*WS_CHAR_S_X-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2);
@@ -167,7 +168,8 @@ void LCDTerminal::showCursor() {
 }
 
 void LCDTerminal::hideCursor() {
-  if( _flags&WS_F_CUR_ON && _flags&WS_F_CUR_VIS) 
+//  if( _flags&WS_F_CUR_ON && _flags&WS_F_CUR_VIS) 
+ if(_flags&WS_F_CUR_VIS) 
   {
     Tft.setFillColor(LCD_BG);
     Tft.fillScreen((INT16U)(_x_pos)*WS_CHAR_S_X+2, (INT16U)(_x_pos+1)*WS_CHAR_S_X-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-2, (INT16U)(_yeff+1)*WS_CHAR_S_Y-1);

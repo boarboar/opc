@@ -89,7 +89,7 @@ uint32_t t;
 #define REP_COUNT  20
 #define CURSOR_COUNT  16
 
-#define EMIT(K) { Serial.print((K)); if(flags&F_SER_ECHO_ON) term.printc((K)); }  
+#define EMIT(K) { Serial.print((K)); if(flags&F_SER_ECHO_ON) { term.hideCursor(); term.printc((K)); } }  
 #define PRINT_ECHO_STATUS() {term.println((flags&F_SER_ECHO_ON) ? "[ECHO ON]" : "[ECHO OFF]");}
 #define PRINT_XCTRL_STATUS() {term.println((flags&F_SER_XCTRL_ON) ? "[XONOFF ON]" : "[XONOFF OFF]");}
 
@@ -130,7 +130,7 @@ void loop() {
   if(Serial.available()>0) {
     uint16_t cc=0;  
     term.hideCursor();
-    term.cursorCtrlOff();
+    //term.cursorCtrlOff();
     while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
       EMIT_XOFF();
       byte b = Serial.read();       
@@ -139,8 +139,8 @@ void loop() {
       //Serial.print((char)b);
       // if(cc>16) Serial.print(CODE_XOFF); // try this
     }
-    term.showCursor();
-    term.cursorCtrlOn();
+    //term.showCursor();
+    //term.cursorCtrlOn();
   }
   if(millis()<t) { // wraparound
     t=millis();

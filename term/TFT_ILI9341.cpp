@@ -292,8 +292,10 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
     for (i=0; i<FONT_SZ; i++, poX+=_size_mask_thick ) {
         temp = simpleFont[ascii-0x20][i];
         y=poY;
-        if(poX>=0) for(INT8U f=0;f<8;f++, y+=_size_mask_thick)
+        if(poX>=0) 
+        for(INT8U f=0;f<8;f++, y+=_size_mask_thick)
         {
+            // todo - try to glue continuois pixels together
             if(y>=0 && (temp>>f)&0x01) // if bit is set in the font mask
             {
               //fillScreen(poX, poX+_size_mask_thick, y, y+_size_mask_thick); //note - actually double size
