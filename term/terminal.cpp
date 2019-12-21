@@ -116,7 +116,8 @@ void LCDTerminal::printc(char c) {
       break;
     case '\t' :  
       _x_pos+=WS_TAB_IDENT;
-      _x_eol_pos+=WS_TAB_IDENT;
+      //_x_eol_pos+=WS_TAB_IDENT;
+      if(_x_pos > _x_eol_pos) _x_eol_pos = _x_pos;
       if(_x_eol_pos >= WS_CHAR_N_X) advance_y();
       break;
     case '\b' :
@@ -129,7 +130,8 @@ void LCDTerminal::printc(char c) {
       if(_x_pos<_x_eol_pos) eraseEOL();
       Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_yeff*WS_CHAR_S_Y);
       ++_x_pos;
-      ++_x_eol_pos;
+      //++_x_eol_pos;
+      if(_x_pos > _x_eol_pos) _x_eol_pos = _x_pos;
       if(_x_eol_pos >= WS_CHAR_N_X) advance_y();
   }
   _prev_chr=c;
