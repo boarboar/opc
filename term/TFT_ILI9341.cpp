@@ -157,19 +157,6 @@ void TFT::setOrientation(int flags)
   _flags |= flags&LCD_ORIENTATION;
 }
 
-/*
-void TFT::setWindow(INT16U StartCol, INT16U EndCol, INT16U StartPage,INT16U EndPage)
-{
-    sendCMD(0x2A);                                                      
-    sendData(StartCol); 
-    sendData(EndCol);
-    sendCMD(0x2B);                                                      
-    sendData(StartPage);
-    sendData(EndPage);
-    sendCMD(0x2c);
-}
-*/
-
 void TFT::fillScreen(void)
 {
    setBgColor(BLACK);
@@ -196,25 +183,6 @@ void TFT::fillScreen(INT16 XL, INT16 XR, INT16 YU, INT16 YD)
     TFT_DC_HIGH;
     TFT_CS_LOW;
     
-    
-//    while(YD--) {
-//      XL=XR;
-//      while(XL--) {
-//        if(_flags&LCD_BG) {
-//          //SPI.transfer(_bgColorH);
-//          //SPI.transfer(_bgColorL);
-//          spi_transmit(_bgColorH);
-//          spi_transmit(_bgColorL);
-//        }
-//        else {
-//          //SPI.transfer(_fgColorH);
-//          //SPI.transfer(_fgColorL);
-//          spi_transmit(_fgColorH);
-//          spi_transmit(_fgColorL);
-//        }
-//      }
-//    }
-//    
     if(_flags&LCD_BG) {
       while(YD--) {
         XL=XR;
@@ -232,33 +200,6 @@ void TFT::fillScreen(INT16 XL, INT16 XR, INT16 YU, INT16 YD)
           }
       }
     }
-
-//    if(_flags&LCD_BG) {
-//      while(YD--) {
-//        XL=XR;
-//        while(XL--) {
-//          while (!(UCB0IFG & UCTXIFG));
-//          UCB0TXBUF = _bgColorH;	/* Wait for previous tx to complete. */
-//  	  while (!(UCB0IFG & UCTXIFG));
-//	  /* Setting TXBUF clears the TXIFG flag. */	
-//          UCB0TXBUF = _bgColorL;   
-//        }
-//      }      
-//    } else {
-//      while(YD--) {
-//        XL=XR;
-//        while(XL--) {
-//          while (!(UCB0IFG & UCTXIFG));
-//          UCB0TXBUF = _fgColorH;	/* Wait for previous tx to complete. */
-//  	  while (!(UCB0IFG & UCTXIFG));
-//	  /* Setting TXBUF clears the TXIFG flag. */	
-//          UCB0TXBUF = _fgColorL;           }
-//      }
-//    }
-//   while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
-//   // clear RXIFG flag
-//   UCB0IFG &= ~UCRXIFG;
-
 }
 
 // ##############################################################################################
@@ -284,6 +225,7 @@ void TFT::scrollAddress(INT16U vsp) {
 
 void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
 {   
+    if(poY<0 || poX<0) return;
     if((ascii<32)||(ascii>129)) ascii = '?';
     INT16U y;
     INT8U i, temp;
@@ -291,223 +233,25 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
     
     for (i=0; i<FONT_SZ; i++, poX+=_size_mask_thick ) {
         temp = simpleFont[ascii-0x20][i];
-        y=poY;
-        if(poX>=0) 
+        y=poY; 
         for(INT8U f=0;f<8;f++, y+=_size_mask_thick)
         {
             // todo - try to glue continuois pixels together
-            if(y>=0 && (temp>>f)&0x01) // if bit is set in the font mask
+            if((temp>>f)&0x01) // if bit is set in the font mask
             {
-              //fillScreen(poX, poX+_size_mask_thick, y, y+_size_mask_thick); //note - actually double size
-              sendCMD(0x2A); sendData(poX); sendData(poX+_size_mask_thick);
-              sendCMD(0x2B); sendData(y); sendData(y+_size_mask_thick);
+              sendCMD(0x2A); sendData(poX); sendData(poX+_size_mask_thick-1);
+              sendCMD(0x2B); sendData(y); sendData(y+_size_mask_thick-1);
               sendCMD(0x2c);
               TFT_DC_HIGH;
               TFT_CS_LOW;
-              nb=(_size_mask_thick+1)*(_size_mask_thick+1);
-              /*
-              while(nb--) {
-                SPI.transfer(_fgColorH);
-                SPI.transfer(_fgColorL);
-              }
-              */
-              
+              nb=(_size_mask_thick)*(_size_mask_thick);
               while(nb--) {
                 spi_transmit(_fgColorH);
                 spi_transmit(_fgColorL);
-              }
-                                
-//              while(nb--) {
-//                while (!(UCB0IFG & UCTXIFG));
-//                UCB0TXBUF = _fgColorH;	/* Wait for previous tx to complete. */
-//  	        while (!(UCB0IFG & UCTXIFG));
-//	        /* Setting TXBUF clears the TXIFG flag. */	
-//                UCB0TXBUF = _fgColorL;    	        
-//              } 
-//              while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
-//  	      // clear RXIFG flag
-//	      UCB0IFG &= ~UCRXIFG;
+              }                              
             }
-        }
-    }
+            
+        } //for y
+    } // for x
 }
 
-/*
-void TFT::drawChar( INT8U ascii, INT16U poX, INT16U poY)
-{   
-    if(_flags&LCD_OPAQ) { setFillColor(LCD_BG); fillScreen(poX, poX+FONT_SPACE*_size_mask_thick, poY, poY+FONT_Y*_size_mask_thick); }	
-    setFillColor(LCD_FG);
-    if((ascii<32)||(ascii>129)) ascii = '?';
-    for (INT8U i=0; i<FONT_SZ; i++, poX+=_size_mask_thick ) {
-        INT8U temp = simpleFont[ascii-0x20][i];
-        INT16U y=poY;
-        for(INT8U f=0;f<8;f++, y+=_size_mask_thick)
-        {
-            if((temp>>f)&0x01) // if bit is set in the font mask
-            {
-              fillScreen(poX, poX+_size_mask_thick, y, y+_size_mask_thick); //note - actually double size
-            }
-        }
-    }
-    setFillColor(LCD_BG);
-}
-
-INT16U TFT::drawString(const char *string, INT16U poX, INT16U poY)
-{
-    while(*string)
-    {
-        drawCharLowRAM(*string, poX, poY);
-        string++;
-        if(poX < getMaxX()) poX += FONT_SPACE*_size_mask_thick;   // Move cursor right 
-        else break;
-    }
-    return poX;
-}
-
-void TFT::drawLineThick(INT16 x0,INT16 y0,INT16 x1,INT16 y1)
-{   
-    int16_t dx, dy;
-    if(x0>=x1) {dx=x1; x1=x0; x0=dx; dy=y1; y1=y0; y0=dy;}
-    dx=x1-x0;    
-    if(y0<y1) dy=y0-y1; else dy=y1-y0;
-    
-    int16_t err = dx+dy; // error value e_xy            
-    
-    setFillColor(LCD_FG);
-    
-    for (;;){                                                          
-        if (2*err >= dy) {                   // e_xy+e_x > 0                 
-            if(x0>=0) { // draw vertical line at x0, length of _size_mask_thick : y0-_size_mask_thick/2 -  y0+_size_mask_thick/2
-              fillScreen(x0, x0, y0-_size_mask_thick/2, y0+_size_mask_thick/2); // TODO - expand
-            }
-            if (x0 == x1) break;
-            err += dy; x0++;
-        }
-        if (2*err <= dx) {                   // e_xy+e_y < 0                 
-            //th2=_size_mask_thick/2;
-            if(x0>=_size_mask_thick/2) { // draw horizontal line at y0, length of _size_mask_thick : x0-_size_mask_thick/2 -  x0+_size_mask_thick/2
-              fillScreen(x0-_size_mask_thick/2, x0+_size_mask_thick/2, y0, y0); // TODO - expand              
-            }
-            if (y0 == y1) break;
-            err += dx; 
-            if(y0<y1) y0++; else y0--;
-        }
-    }
-}
-
-void TFT::drawLineThickLowRAM(INT16 x0,INT16 y0,INT16 x1,INT16 y1)
-{   
-    int16_t dx, dy;
-    if(x0>=x1) {dx=x1; x1=x0; x0=dx; dy=y1; y1=y0; y0=dy;}
-    dx=x1-x0;    
-    if(y0<y1) dy=y0-y1; else dy=y1-y0;
-    
-    int16_t err = dx+dy; // error value e_xy            
-    uint8_t th2;
-      
-    for (;;){                                                          
-        if (2*err >= dy) {                   // e_xy+e_x > 0                 
-            if(x0>=0) { // draw vertical line at x0, length of _size_mask_thick : y0-_size_mask_thick/2 -  y0+_size_mask_thick/2
-              th2=_size_mask_thick/2;
-              sendCMD(0x2A); sendData(x0); sendData(x0);
-              sendCMD(0x2B); sendData(y0-th2); sendData(y0+th2);
-              sendCMD(0x2c);
-              TFT_DC_HIGH;
-              TFT_CS_LOW;
-              th2=th2*2+1;
-              while(th2--) {
-                SPI.transfer(_fgColorH);
-                SPI.transfer(_fgColorL);
-              }           
-            }
-            if (x0 == x1) break;
-            err += dy; x0++;
-        }
-        if (2*err <= dx) {                   // e_xy+e_y < 0                 
-            th2=_size_mask_thick/2;
-            if(x0>=_size_mask_thick/2) { // draw horizontal line at y0, length of _size_mask_thick : x0-_size_mask_thick/2 -  x0+_size_mask_thick/2
-              sendCMD(0x2A); sendData(x0-th2); sendData(x0+th2);
-              sendCMD(0x2B); sendData(y0); sendData(y0);
-              sendCMD(0x2c);
-              TFT_DC_HIGH;
-              TFT_CS_LOW;
-              th2=th2*2+1;
-              while(th2--) {
-                SPI.transfer(_fgColorH);
-                SPI.transfer(_fgColorL);
-              }            
-            }
-            if (y0 == y1) break;
-            err += dx; 
-            if(y0<y1) y0++; else y0--;
-        }
-    }
-}
-
-void TFT::drawLineThickLowRAM8Bit(INT16 x0,INT16 y0,INT16 x1,INT16 y1)
-{   
-    int16_t err;
-    uint8_t dy;
-    uint8_t dx;
-    uint8_t th2;
-    if(x0>=x1) {dx=x1; x1=x0; x0=dx; dy=y1; y1=y0; y0=dy;}
-    dx=x1-x0;    
-    if(y0<y1) dy=y1-y0; else dy=y0-y1;
-    
-    err = dx-dy; // error value e_xy            
-          
-    for (;;){                                                          
-        if (2*err+dy >= 0) {                   // e_xy+e_x > 0                 
-            if(x0>=0) { // draw vertical line at x0, length of _size_mask_thick : y0-_size_mask_thick/2 -  y0+_size_mask_thick/2
-              th2=_size_mask_thick/2;
-              sendCMD(0x2A); sendData(x0); sendData(x0);
-              sendCMD(0x2B); sendData(y0-th2); sendData(y0+th2);
-              sendCMD(0x2c);
-              TFT_DC_HIGH;
-              TFT_CS_LOW;
-              th2=th2*2+1;
-              while(th2--) {
-                SPI.transfer(_fgColorH);
-                SPI.transfer(_fgColorL);
-              }           
-            }
-            if (x0 == x1) break;
-            err -= dy; x0++;
-        }
-        if (2*err <= dx) {                   // e_xy+e_y < 0                 
-            th2=_size_mask_thick/2;
-            if(x0>=_size_mask_thick/2) { // draw horizontal line at y0, length of _size_mask_thick : x0-_size_mask_thick/2 -  x0+_size_mask_thick/2
-              sendCMD(0x2A); sendData(x0-th2); sendData(x0+th2);
-              sendCMD(0x2B); sendData(y0); sendData(y0);
-              sendCMD(0x2c);
-              TFT_DC_HIGH;
-              TFT_CS_LOW;
-              th2=th2*2+1;
-              while(th2--) {
-                SPI.transfer(_fgColorH);
-                SPI.transfer(_fgColorL);
-              }            
-            }
-            if (y0 == y1) break;
-            err += dx; 
-            if(y0<y1) y0++; else y0--;
-        }
-    }
-}
-*/
-
-/*        
-void TFT::drawRectangle(INT16 poX, INT16 poY, INT16U length, INT16U width)
-{
-    drawHorizontalLine(poX, poY, length);
-    drawHorizontalLine(poX, poY+width, length);
-    drawVerticalLine(poX, poY, width);
-    drawVerticalLine(poX + length, poY, width);
-
-}
-*/
-
-//TFT Tft=TFT();
-/*********************************************************************************************************
-  END FILE
-*********************************************************************************************************/

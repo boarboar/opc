@@ -189,25 +189,9 @@ public:
 	void setOrientation(int value);
         void fillScreen(void);
 	void fillScreen(INT16 XL,INT16 XR,INT16 YU,INT16 YD);
-	//void drawChar(INT8U ascii,INT16U poX, INT16U poY);
+
         void drawCharLowRAM(INT8U ascii,INT16U poX, INT16U poY);
-        //INT16U drawString(const char *string,INT16U poX, INT16U poY);
-	//inline void fillRectangle(INT16 poX, INT16 poY, INT16 length, INT16U width) { setFillColor(LCD_BG); fillScreen(poX, poX+length, poY, poY+width); }	
-        //void drawLineThick(INT16 x0,INT16 y0,INT16 x1,INT16 y1);
-        //void drawLineThickLowRAM(INT16 x0,INT16 y0,INT16 x1,INT16 y1);
-        //void drawLineThickLowRAM8Bit(INT16 x0,INT16 y0,INT16 x1,INT16 y1);
-        //inline void drawVerticalLine(INT16 poX, INT16 poY,INT16 length) { setFillColor(LCD_FG); fillScreen(poX,poX,poY,poY+length);}  
-        //inline void drawHorizontalLine(INT16 poX, INT16 poY,INT16 length) {setFillColor(LCD_FG); fillScreen(poX,poX+length,poY,poY);}   
-        //void drawStraightDashedLine(INT8U dir, INT16 poX, INT16 poY, INT16U length);
-        /*
-        inline void drawRectangle(INT16 poX, INT16 poY, INT16U length,INT16U width) { \
-          setFillColor(LCD_FG); \
-          fillScreen(poX,poX+length,poY,poY); \
-          fillScreen(poX,poX+length,poY+width,poY+width); \
-          fillScreen(poX,poX,poY,poY+width); \
-          fillScreen(poX+length,poX+length,poY,poY+width); \
-        }
-        */	
+
         inline INT16U  getMinX() { return 0; }
         inline INT16U  getMinY() { return 0; }
         inline INT16U  getMaxX() { return _flags&LCD_SWITCH_XY ? MAX_Y : MAX_X; }
@@ -229,10 +213,6 @@ public:
 
 protected:
         void WriteCmdSeq(const INT8U *data);
-//        void setWindow(INT16U StartCol, INT16U EndCol, INT16U StartPage,INT16U EndPage);
-	//void sendCMD(INT8U index);
-	//void WRITE_DATA(INT8U data);
-	//void sendData(INT16U data);
 
        //Ctx 
         INT8U _flags;	
