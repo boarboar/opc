@@ -229,8 +229,9 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
     
     for (i=0; i<FONT_SZ; i++, poX+=_size_mask_thick ) {
         temp = simpleFont[ascii-0x20][i];
-        y=poY; 
+        if(!temp) continue;
         
+        y=poY;        
         for(f=0;f<8;f++, y+=_size_mask_thick)
         {
             if((temp>>f)&0x01) // if bit is set in the font mask
@@ -248,61 +249,51 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
             }
         }
         
-        /*
+/*        
                     // todo - try to glue continuois pixels together
-        INT8U from=0xff;
-        for(f=0;f<8;f++, y+=_size_mask_thick)
+        INT8U from=0x10;
+        for(f=0;f<8;f++)
         {
             if((temp>>f)&0x01) // if bit is set in the font mask
             {
-//                sendCMD(0x2A); sendData(poX); sendData(poX+_size_mask_thick-1);
-//                sendCMD(0x2B); sendData(y); sendData(y+_size_mask_thick-1);
-//                sendCMD(0x2c);
-//                TFT_DC_HIGH;
-//                TFT_CS_LOW;
-//                nb=(_size_mask_thick)*(_size_mask_thick);
-//                while(nb--) {
-//                  spi_transmit(_fgColorH);
-//                  spi_transmit(_fgColorL);
-//                }
-              if(from==0xff) { // new line
+              if(from==0x10) { // new line
                 from = f;
               }
               else { ; } // continue line
             } // if bit is set in the font mask
             else { // if bit is not set in the font mask
-              if(from==0xff) { // continue empty
+              if(from==0x10) { // continue empty
                 ;
               }
               else { // stop line              
                 sendCMD(0x2A); sendData(poX); sendData(poX+_size_mask_thick-1);
-                sendCMD(0x2B); sendData(poY+from*_size_mask_thick); sendData(poY+(f-1)*_size_mask_thick-1);
+                sendCMD(0x2B); sendData(poY+from*_size_mask_thick); sendData(poY+f*_size_mask_thick-1);
                 sendCMD(0x2c);
                 TFT_DC_HIGH;
                 TFT_CS_LOW;
-                nb=(_size_mask_thick*(f-from-1))*(_size_mask_thick);
+                nb=(_size_mask_thick*(f-from))*(_size_mask_thick);
                 while(nb--) {
                   spi_transmit(_fgColorH);
                   spi_transmit(_fgColorL);
                 }
-                from=0xff;
+                from=0x10;
               } // stop line
             } // if bit is not set
         } //for y
         
-          if(from!=0xff) { // unclosed line
-                sendCMD(0x2A); sendData(poX); sendData(poX+_size_mask_thick-1);
-                sendCMD(0x2B); sendData(poY+from*_size_mask_thick); sendData(poY+(f-1)*_size_mask_thick-1);
-                sendCMD(0x2c);
-                TFT_DC_HIGH;
-                TFT_CS_LOW;
-                nb=(_size_mask_thick*(f-from-1))*(_size_mask_thick);
-                while(nb--) {
-                  spi_transmit(_fgColorH);
-                  spi_transmit(_fgColorL);
-                }
-           }
-           */
+        if(from!=0x10) { // unclosed line
+              sendCMD(0x2A); sendData(poX); sendData(poX+_size_mask_thick-1);
+              sendCMD(0x2B); sendData(poY+from*_size_mask_thick); sendData(poY+f*_size_mask_thick-1);
+              sendCMD(0x2c);
+              TFT_DC_HIGH;
+              TFT_CS_LOW;
+              nb=(_size_mask_thick*(f-from))*(_size_mask_thick);
+              while(nb--) {
+                spi_transmit(_fgColorH);
+                spi_transmit(_fgColorL);
+              }
+         }
+        */   
     } // for x
 }
 
