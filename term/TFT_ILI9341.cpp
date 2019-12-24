@@ -223,14 +223,14 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
 {   
     if(poY<0 || poX<0) return;
     if((ascii<32)||(ascii>129)) ascii = '?';
-    INT16U y; //!!!
+    //INT16U y; //!!!
     INT8U i, temp;
     INT8U nb, f;
     
     for (i=0; i<FONT_SZ; i++, poX+=_size_mask_thick ) {
         temp = simpleFont[ascii-0x20][i];
         if(!temp) continue;
-        
+  /*      
         y=poY;        
         for(f=0;f<8;f++, y+=_size_mask_thick)
         {
@@ -249,7 +249,7 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
             }
         }
         
-/*        
+*/        
                     // todo - try to glue continuois pixels together
         INT8U from=0x10;
         for(f=0;f<8;f++)
@@ -293,7 +293,7 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
                 spi_transmit(_fgColorL);
               }
          }
-        */   
+          
     } // for x
 }
 
