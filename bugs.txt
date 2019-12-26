@@ -29,3 +29,32 @@
 
 
 insert inside line assumes moving the tail to right (!!!) --  or try to erase EOL (!)
+
+enable TX interrupts for SPI :
+
+#define UCxIE         UC0IE
+#define UCBzTXIE      UCB0TXIE
+
+UCxIE |= UCBzTXIE;
+
+hack usci_isr_handler.h & c
+
+add 
+
+if( (UCB0CTL0 & SPI_MODE_MASK)!=0 && (UCB0IFG & UCTXIFG) != 0) )
+	spi_tx_isr();
+
+void USCIB0_ISR(void)
+{
+	still_asleep = stay_asleep;
+
+	/* USCI_B0 I2C state change interrupt. */
+	if ((UCB0CTL0 & UCMODE_3) == UCMODE_3 && (UCB0IFG & (UCALIFG | UCNACKIFG | UCSTTIFG | UCSTPIFG)) != 0)
+		i2c_state_isr(); 
+	/* USCI_B0 I2C TX RX interrupt. */
+	if ((UCB0CTL0 & UCMODE_3) == UCMODE_3 && (UCB0IFG & (UCTXIFG | UCRXIFG)) != 0)
+		i2c_txrx_isr();
+
+	if (still_asleep != stay_asleep)
+		__bic_SR_register_on_exit(LPM4_bits);
+}
