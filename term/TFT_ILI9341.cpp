@@ -35,27 +35,29 @@
 #define UCTXIFG  UCB0TXIFG
 #endif
 
-inline static void spi_transmit(const uint8_t _data) {
+inline void spi_transmit(const uint8_t _data) {
   	UCB0TXBUF = _data; // setting TXBUF clears the TXIFG flag
 
-	while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+	//while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+        while (!(UCB0IFG & UCTXIFG));
+
 	// clear RXIFG flag
-        UCB0IFG &= ~UCRXIFG;
+        //UCB0IFG &= ~UCRXIFG;
 }
 
-inline static void spi_transmit16_msb(const uint16_t data)
-{
-	/* Wait for previous tx to complete. */
-	//while (!(UCB0IFG & UCTXIFG));   // do we need it?
-	/* Setting TXBUF clears the TXIFG flag. */
-        UCB0TXBUF = data >> 8;	/* Wait for previous tx to complete. */
-	while (!(UCB0IFG & UCTXIFG));
-	/* Setting TXBUF clears the TXIFG flag. */	
-        UCB0TXBUF = data | 0xFF;
-	while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
-	// clear RXIFG flag
-	UCB0IFG &= ~UCRXIFG;
-}
+//inline static void spi_transmit16_msb(const uint16_t data)
+//{
+//	/* Wait for previous tx to complete. */
+//	//while (!(UCB0IFG & UCTXIFG));   // do we need it?
+//	/* Setting TXBUF clears the TXIFG flag. */
+//        UCB0TXBUF = data >> 8;	/* Wait for previous tx to complete. */
+//	while (!(UCB0IFG & UCTXIFG));
+//	/* Setting TXBUF clears the TXIFG flag. */	
+//        UCB0TXBUF = data | 0xFF;
+//	while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
+//	// clear RXIFG flag
+//	UCB0IFG &= ~UCRXIFG;
+//}
 
 const INT8U seq[]={
       4, 0xEF,    0x03,0x80,0x02, // try to uncomment
@@ -192,7 +194,7 @@ void TFT::fillScreen(INT16 XL, INT16 XR, INT16 YU, INT16 YD)
         XL=XR;
         while(XL--) {
           spi_transmit(_fgColorH);
-          spi_transmit(_fgColorL);          
+          spi_transmit(_fgColorL);        
           }
       }
     }
