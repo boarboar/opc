@@ -284,16 +284,16 @@ void TFT::drawCharLowRAM( INT8U ascii, INT16U poX, INT16U poY)
         } //for y
         
         if(from!=0x10) { // unclosed line
-              sendCMD(0x2A); sendData(poX); sendData(poX+_size_mask_thick-1);
-              sendCMD(0x2B); sendData(poY+from*_size_mask_thick); sendData(poY+f*_size_mask_thick-1);
-              sendCMD(0x2c);
-              TFT_DC_HIGH;
-              TFT_CS_LOW;
-              nb=(_size_mask_thick*(f-from))*(_size_mask_thick);
-              while(nb--) {
-                spi_transmit(_fgColorH);
-                spi_transmit(_fgColorL);
-              }
+            sendCMD(0x2A); sendData(poX); sendData(poX+_size_mask_thick-1);
+            sendCMD(0x2B); sendData(poY+from*_size_mask_thick); sendData(poY+f*_size_mask_thick-1);
+            sendCMD(0x2c);
+            TFT_DC_HIGH;
+            TFT_CS_LOW;
+            nb=(_size_mask_thick*(f-from))*(_size_mask_thick);
+            while(nb--) {
+              spi_transmit(_fgColorH);
+              spi_transmit(_fgColorL);
+            }
          }
           
     } // for x

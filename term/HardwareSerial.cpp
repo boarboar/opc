@@ -73,7 +73,7 @@
 #endif
 #define UCAxIV        UCA0IV
 
-#define SERIAL_BUFFER_SIZE_RX 120
+#define SERIAL_BUFFER_SIZE_RX 160
 #define SERIAL_BUFFER_SIZE_TX 8
 
 

@@ -1,5 +1,6 @@
 
 #include <SPI.h>
+#include "MspFlash.h"
 #include "terminal.h"
 
 // 2552 USI
@@ -41,6 +42,7 @@ uint8_t  key_in[KEY_COUNT_BYTES] = {0};
 #define KEY_SERIAL_SPEED   0xf9
 #define KEY_SERIAL_ECHO    0xf8
 #define KEY_SERIAL_XCTRL   0xf7
+#define KEY_FLASH_WRITE    0xf6
 #define KEY_CTRL_C  0x3
 #define KEY_CTRL_D  0x4
 #define KEY_ESC     0x1b
@@ -64,7 +66,7 @@ const uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 
 const uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 {KEY_ESC,  KEY_CTRL_C, KEY_CTRL_D, 0, 0, KEY_ESC_L, KEY_ESC_U, KEY_ESC_D, KEY_ESC_R, '\b'},  //  l, u, d, r, bsp
-{'\t', '~', 0, 0, '-', '_', '=', '+', '\\', '|'},
+{'\t', '~', KEY_FLASH_WRITE, 0, '-', '_', '=', '+', '\\', '|'},
 {KEY_DEL, KEY_SERIAL_XCTRL, ';', ':', '"', '\'', '[', '{', ']', '}'},
 {0,0,KEY_SERIAL_SPEED, KEY_SERIAL_ECHO,',','<', '.', '>', '/', '?'}
 };
@@ -99,6 +101,7 @@ uint32_t t;
 #define EMIT_XON() {if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XON);}
 #define EMIT_XOFF() {if(flags&F_SER_XCTRL_ON) Serial.print(CODE_XOFF);}
 
+#define flash SEGMENT_D
 
 void setup() {                
   // initialize the digital pin as an output.
@@ -111,15 +114,16 @@ void setup() {
   for(int row=0; row<ROW_COUNT; row++) pinMode(rowPins[row], INPUT_PULLUP);  
   
   digitalWrite(KB_LED, HIGH);
-  Serial.begin(9600);  
+  flash_read();
+  Serial.begin(serial_rates[serial_rate_idx]);  
   EMIT_XOFF();
   term.init();  
   delay(10);
   while(Serial.available()>0) Serial.read(); // clear input
-  term.prints("TERM v1.01 "); 
+  term.prints("TERM v1.1 "); 
   term.prints(serial_rates_descr[serial_rate_idx]);
   PRINT_ECHO_STATUS();
-  PRINT_XCTRL_STATUS();
+  //PRINT_XCTRL_STATUS();
   
   digitalWrite(KB_LED, LOW);
   t=millis();
@@ -212,6 +216,10 @@ inline void key_loop() {
                   }
                   PRINT_XCTRL_STATUS();
                   key=0;
+                } else if((uint8_t)key==KEY_FLASH_WRITE) {
+                  flash_write();
+                  term.println("FWR");
+                  key=0;
                 }
                 if(key) {
                   key_pressed = key;
@@ -284,4 +292,29 @@ inline void key_loop() {
     EMIT(key_pressed);
     rep=0;
   }
+}
+
+const unsigned char flash_magic=0x57;
+
+boolean flash_read() {
+  unsigned char p = 0;
+  Flash.read(flash+0, &p, 1);
+  if(p!=flash_magic) return false;
+  Flash.read(flash+1, &p, 1);
+  if(p<SERIAL_RATES_N) serial_rate_idx=p;
+  Flash.read(flash+2, &p, 1);
+  if(p) flags|=F_SER_ECHO_ON;
+  else flags&=~F_SER_ECHO_ON;
+}
+
+boolean flash_write() {
+  unsigned char p;
+  Flash.erase(flash);
+  p = flash_magic;
+  Flash.write(flash+0, &p, 1);
+  p = serial_rate_idx;
+  Flash.write(flash+1, &p, 1);
+  p = flags&F_SER_ECHO_ON ? 1 : 0;
+  Flash.write(flash+2, &p, 1);
+  return true;
 }

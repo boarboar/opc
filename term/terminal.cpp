@@ -140,6 +140,7 @@ void LCDTerminal::printc(char c) {
 }
 
 void LCDTerminal::advance_y() {
+  //_line_len[_yeff]=_x_pos;
   if(++_y_pos>=WS_CHAR_N_Y) {
     _y_pos=WS_CHAR_N_Y;    
     scroll();
@@ -156,7 +157,7 @@ void LCDTerminal::scroll() {
   Tft.scrollAddress((INT16U)(_y_scroll)*WS_CHAR_S_Y); 
   Tft.setFillColor(LCD_BG);
   Tft.fillScreen(0, WS_SCREEN_SIZE_X-1, (INT16U)(_y_scroll-1)*WS_CHAR_S_Y, (INT16U)_y_scroll*WS_CHAR_S_Y);
-  //Tft.fillScreen(0, (INT16U)(_x_pos)*WS_CHAR_S_X-1, (INT16U)(_y_scroll-1)*WS_CHAR_S_Y, (INT16U)_y_scroll*WS_CHAR_S_Y);
+  //Tft.fillScreen(0, (INT16U)(_line_len[_y_scroll-1])*WS_CHAR_S_X-1, (INT16U)(_y_scroll-1)*WS_CHAR_S_Y, (INT16U)_y_scroll*WS_CHAR_S_Y);
 }
 
 void LCDTerminal::showCursor() {

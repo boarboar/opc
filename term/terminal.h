@@ -16,6 +16,7 @@
 
 #define WS_BG_COLOR  BLACK
 #define WS_FG_COLOR  GREEN
+//#define WS_FG_COLOR  WHITE
 #define WS_FG_COLOR_CTRL  YELLOW
 
 #define WS_CHAR_DEF_SIZE 1
@@ -68,6 +69,9 @@ protected:
   char  _prev_chr;  
   uint8_t _esc_state;
   uint8_t _esc_val[2];
+  
+  //uint8_t _line_len[WS_CHAR_N_Y];
+  
   void advance_y();
   char esc_cmd(char c);
 
