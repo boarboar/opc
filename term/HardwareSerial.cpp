@@ -73,7 +73,7 @@
 #endif
 #define UCAxIV        UCA0IV
 
-#define SERIAL_BUFFER_SIZE_RX 160
+#define SERIAL_BUFFER_SIZE_RX 200
 #define SERIAL_BUFFER_SIZE_TX 8
 
 
@@ -200,6 +200,7 @@ void HardwareSerial::end()
 int HardwareSerial::available(void)
 {
 	return (unsigned int)(SERIAL_BUFFER_SIZE_RX + _rx_buffer->head - _rx_buffer->tail) % SERIAL_BUFFER_SIZE_RX;
+        //return _rx_buffer->head != _rx_buffer->tail;
 }
 
 int HardwareSerial::peek(void)

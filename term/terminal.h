@@ -44,10 +44,6 @@ class LCDTerminal {
 public:
   void init();
   void lcd_defaults();
-//  inline void cursorCtrlOff() {_flags |= WS_F_CUR_IGNORE;}
-//  inline void cursorCtrlOn() {_flags &= ~WS_F_CUR_IGNORE;}
-//  inline void cursorOn() {_flags |= WS_F_CUR_ON; showCursor();}
-//  inline void cursorOff() {hideCursor(); _flags &= ~WS_F_CUR_ON;}
   inline void cursorBlink() {if(_flags & WS_F_CUR_VIS) hideCursor(); else showCursor();} 
   void printc(char c);
   void prints(const char *s);

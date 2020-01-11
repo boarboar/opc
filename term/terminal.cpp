@@ -22,22 +22,13 @@ void LCDTerminal::lcd_defaults() {
   Tft.setOpaq(LCD_TRANSP);
   Tft.setFillColor(LCD_BG);
   Tft.setupScrollArea(WS_SCREEN_SIZE_Y, 0, 0);
-  //_flags |= WS_F_CUR_ON;
 }
 
 void LCDTerminal::prints(const char *s) {
-//  if(_flags & WS_F_CUR_ON) {
-//    _flags |= WS_F_CUR_SUPP;
-//    cursorOff();
-//  }
   setCtrlColor();
   const char *p = s;
   while(*p) printc(*p++);
   setDataColor();
-//  if(_flags & WS_F_CUR_SUPP) {
-//    _flags |= WS_F_CUR_ON;
-//    cursorOn();
-//  }
 }
 
 char LCDTerminal::esc_cmd(char c) {
@@ -106,8 +97,6 @@ void LCDTerminal::printc(char c) {
   
   if(c==0) return;
   
-  //if(cctrl) hideCursor();
-  //if(!_flags&WS_F_CUR_IGNORE) hideCursor();
   switch(c) {
     case '\n' : //lf
       if(_prev_chr=='\r') break;  // ignore CR LF
@@ -116,7 +105,6 @@ void LCDTerminal::printc(char c) {
       break;
     case '\t' :  
       _x_pos+=WS_TAB_IDENT;
-      //_x_eol_pos+=WS_TAB_IDENT;
       if(_x_pos > _x_eol_pos) _x_eol_pos = _x_pos;
       if(_x_eol_pos >= WS_CHAR_N_X) advance_y();
       break;
@@ -130,17 +118,14 @@ void LCDTerminal::printc(char c) {
       if(_x_pos<_x_eol_pos) eraseEOL();
       Tft.drawCharLowRAM(c, (INT16U)_x_pos*WS_CHAR_S_X, (INT16U)_yeff*WS_CHAR_S_Y);
       ++_x_pos;
-      //++_x_eol_pos;
       if(_x_pos > _x_eol_pos) _x_eol_pos = _x_pos;
       if(_x_eol_pos >= WS_CHAR_N_X) advance_y();
   }
   _prev_chr=c;
-  //if(cctrl) showCursor();
-  //if(!_flags&WS_F_CUR_IGNORE) showCursor();
 }
 
 void LCDTerminal::advance_y() {
-  //_line_len[_yeff]=_x_pos;
+  //_line_len[_yeff]=_x_eol_pos;
   if(++_y_pos>=WS_CHAR_N_Y) {
     _y_pos=WS_CHAR_N_Y;    
     scroll();
@@ -161,7 +146,6 @@ void LCDTerminal::scroll() {
 }
 
 void LCDTerminal::showCursor() {
- //if(_flags&WS_F_CUR_ON && !(_flags&WS_F_CUR_VIS)) 
  if(!(_flags&WS_F_CUR_VIS)) 
   {
     Tft.setFillColor(LCD_FG);
@@ -170,8 +154,7 @@ void LCDTerminal::showCursor() {
   }
 }
 
-void LCDTerminal::hideCursor() {
-//  if( _flags&WS_F_CUR_ON && _flags&WS_F_CUR_VIS) 
+void LCDTerminal::hideCursor() { 
  if(_flags&WS_F_CUR_VIS) 
   {
     Tft.setFillColor(LCD_BG);

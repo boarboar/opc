@@ -55,7 +55,6 @@ const uint8_t keymap[ROW_COUNT][COL_COUNT] = {
 {KEY_SHIFT, KEY_FN, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ' '}
 };
 
-
 const uint8_t keymap_shift[ROW_COUNT][COL_COUNT] = 
 {
 {'!','@','#','$','%','^','&','*','(',')'},
@@ -65,10 +64,17 @@ const uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 };
 
 const uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
-{KEY_ESC,  KEY_CTRL_C, KEY_CTRL_D, 0, 0, KEY_ESC_L, KEY_ESC_U, KEY_ESC_D, KEY_ESC_R, '\b'},  //  l, u, d, r, bsp
+{KEY_ESC, 0, 0, 0, 0, KEY_ESC_L, KEY_ESC_U, KEY_ESC_D, KEY_ESC_R, '\b'},  //  l, u, d, r, bsp
 {'\t', '~', KEY_FLASH_WRITE, 0, '-', '_', '=', '+', '\\', '|'},
-{KEY_DEL, KEY_SERIAL_XCTRL, ';', ':', '"', '\'', '[', '{', ']', '}'},
-{0,0,KEY_SERIAL_SPEED, KEY_SERIAL_ECHO,',','<', '.', '>', '/', '?'}
+{KEY_DEL, 0, ';', ':', '"', '\'', '[', '{', ']', '}'},
+{0, 0, 0, 0, ',', '<', '.', '>', '/', '?'}
+};
+
+const uint8_t keymap_shift_fn[ROW_COUNT][COL_COUNT] = {
+{0, KEY_CTRL_C, KEY_CTRL_D, 0, 0, 0, 0, 0, 0, 0},  
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0,0,KEY_SERIAL_SPEED, KEY_SERIAL_ECHO, 0, KEY_FLASH_WRITE, 0, 0, 0, 0}
 };
 
 #define SERIAL_RATES_N  5
@@ -133,18 +139,15 @@ void setup() {
 void loop() {
   if(Serial.available()>0) {
     uint16_t cc=0;  
+    int16_t b;
     term.hideCursor();
-    //term.cursorCtrlOff();
-    while(Serial.available()>0 && cc++<400) { // limit to 400 chars at once to give kbhandler a chance
-      EMIT_XOFF();
-      byte b = Serial.read();       
+    while(/*Serial.available()>0 && */cc++<640 && ((b=Serial.read())!=-1)) { // limit to 400 chars at once to give kbhandler a chance
+      //EMIT_XOFF();
+      //byte b = Serial.read();       
       term.printc((char)b);
-      EMIT_XON();
-      //Serial.print((char)b);
+      //EMIT_XON();
       // if(cc>16) Serial.print(CODE_XOFF); // try this
     }
-    //term.showCursor();
-    //term.cursorCtrlOn();
   }
   if(millis()<t) { // wraparound
     t=millis();
@@ -191,6 +194,7 @@ inline void key_loop() {
               case KEY_FN: flags|=F_FN_PRES; break;
               default:
                 char key = 
+                  ((flags&F_SHIFT_PRES) && (flags&F_FN_PRES)) ? keymap_shift_fn[row][col] :
                   flags&F_SHIFT_PRES ? keymap_shift[row][col] :
                   flags&F_FN_PRES ? keymap_fn[row][col] :
                   keymap[row][col];
