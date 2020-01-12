@@ -17,6 +17,13 @@ const byte ROW_COUNT = 4;
 #define dataPin P2_4
 #define clockPin P2_5
 
+#define LATCH_LOW()  {P2OUT &= ~BIT3;}
+#define LATCH_HIGH() {P2OUT |= BIT3;}
+#define DATA_LOW()  {P2OUT &= ~BIT4;}
+#define DATA_HIGH() {P2OUT |= BIT4;}
+#define CLOCK_LOW()  {P2OUT &= ~BIT5;}
+#define CLOCK_HIGH() {P2OUT |= BIT5;}
+
 const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_4}; //can't use P1_5 - spi clk
 
 #define  KEY_COUNT_BYTES ((COL_COUNT*ROW_COUNT-1)/8+1)
@@ -171,11 +178,29 @@ inline void key_loop() {
   for (uint8_t col = 0; col < COL_COUNT; col++)   
   {
     uint8_t s, rval;
-    
+    /*
     digitalWrite(latchPin, HIGH); //Pull latch HIGH to send data
     shiftOut(dataPin, clockPin, MSBFIRST, (~u)>>8); //Send the data HIBYTE
     shiftOut(dataPin, clockPin, MSBFIRST, (~u)&0xFF); //Send the data LOBYTE
     digitalWrite(latchPin, LOW); // Pull latch LOW to stop sending data
+    */
+    
+    LATCH_HIGH();
+    rval = (~u)>>8;
+    for (s = 0; s < 8; s++)  {
+      if( !!(rval & (1 << (7 - s))) ) DATA_HIGH()
+      else DATA_LOW();
+      CLOCK_HIGH();
+      CLOCK_LOW();      
+    }
+    rval = (~u)&0xFF;
+    for (s = 0; s < 8; s++)  {
+      if( !!(rval & (1 << (7 - s))) ) DATA_HIGH()
+      else DATA_LOW();
+      CLOCK_HIGH();
+      CLOCK_LOW();      
+    }    
+    LATCH_LOW();
     
     for(uint8_t row=0; row<ROW_COUNT; row++) { 
       rval=digitalRead(rowPins[row]); // 16_t ???
