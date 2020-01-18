@@ -26,6 +26,16 @@ const byte ROW_COUNT = 4;
 
 const uint16_t rowPins[ROW_COUNT] = {P2_2, P2_1, P2_0, P1_4}; //can't use P1_5 - spi clk
 
+inline uint8_t readRow(uint8_t row) {
+  switch(row) {
+    case 0: return P2IN&BIT2 ? HIGH : LOW; break;
+    case 1: return P2IN&BIT1 ? HIGH : LOW; break;
+    case 2: return P2IN&BIT0 ? HIGH : LOW; break;
+    case 3: return P1IN&BIT4 ? HIGH : LOW; break;
+    default: return LOW;    
+  }
+}
+
 #define  KEY_COUNT_BYTES ((COL_COUNT*ROW_COUNT-1)/8+1)
 uint8_t  key_dn[KEY_COUNT_BYTES] = {0};
 uint8_t  key_in[KEY_COUNT_BYTES] = {0};
@@ -203,7 +213,8 @@ inline void key_loop() {
     LATCH_LOW();
     
     for(uint8_t row=0; row<ROW_COUNT; row++) { 
-      rval=digitalRead(rowPins[row]); // 16_t ???
+      //rval=digitalRead(rowPins[row]); // 16_t ???
+      rval = readRow(row);
       s = SCAN_CODE(row, col);
       if(rval==LOW) { // DN
         if(IS_KEY_DN(s)) {
