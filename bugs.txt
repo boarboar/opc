@@ -58,3 +58,25 @@ void USCIB0_ISR(void)
 	if (still_asleep != stay_asleep)
 		__bic_SR_register_on_exit(LPM4_bits);
 }
+
+
+kbd
+
+......
+xxxxxx
+xoxxox  0.254
+xxxxxx
+......
+xxxxxx
+xoxxox
+xxxxxx
+......
+xxxxxx
+xoxxox
+xxxxxx
+......
+xxxxxx
+xoxxox
+xxxxxx
+......
+
