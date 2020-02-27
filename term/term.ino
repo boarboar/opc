@@ -82,7 +82,7 @@ const uint8_t keymap_shift[ROW_COUNT][COL_COUNT] =
 
 const uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 {KEY_ESC, 0, 0, 0, 0, KEY_ESC_L, KEY_ESC_U, KEY_ESC_D, KEY_ESC_R, '\b'},  //  l, u, d, r, bsp
-{'\t', '~', KEY_FLASH_WRITE, 0, '-', '_', '=', '+', '\\', '|'},
+{'\t', '~', 0, 0, '-', '_', '=', '+', '\\', '|'},
 {KEY_DEL, 0, ';', ':', '"', '\'', '[', '{', ']', '}'},
 {0, 0, 0, 0, ',', '<', '.', '>', '/', '?'}
 };
