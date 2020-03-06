@@ -88,7 +88,7 @@ const uint8_t keymap_fn[ROW_COUNT][COL_COUNT] = {
 };
 
 const uint8_t keymap_shift_fn[ROW_COUNT][COL_COUNT] = {
-{0, KEY_CTRL_C, KEY_CTRL_D, 0, 0, 0, 0, 0, 0, 0},  
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},  
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 {0,0,KEY_SERIAL_SPEED, KEY_SERIAL_ECHO, 0, KEY_FLASH_WRITE, 0, 0, KEY_CTRL_C, KEY_CTRL_D}
